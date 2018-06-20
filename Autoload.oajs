@@ -1968,60 +1968,6 @@ function Res()
 	}
 }
 
-function Re1s()
-{
-	Orion.IgnoreReset();
-	var list = Orion.FindType('0x2006', any, ground, 2);
-
-	if(Shaman==true)	{
-		var band=Orion.FindType('0x0E20', '-1', backpack);
-		var wrongBody="Jako Shaman nemuzes takhle ozivovat.";
-	}
-	else{
-		var band=Orion.FindType('0x0E21', '-1', backpack);
-		var wrongBody="Jako Priest nemuzes ozivovat pomoci obvazu.";
-	}
-	if(!list)return;
-
-	for (var i = 0; i < list.length; i++)
-	{
-
-		Orion.WaitTargetObject(list[i]);
-		Orion.UseObject(band[0]);
-		var start=Orion.Now();
-		Orion.Wait(500);
-		var rtn=Orion.InJournal(wrongBody,'sys',any,any, start,Orion.Now());
-		if(!rtn)Orion.Print("false");
-		if(rtn)
-		{
-			Orion.ClearJournal(wrongBody);
-		}
-		else
-		{
-			Orion.SetGlobal("res",true);
-			Orion.Say("Resuju");
-			Orion.WaitJournal('Ozivil jsi |Ozivila jsi | jsi v ozivovani.', Orion.Now(), Orion.Now()+15000);
-			Orion.ClearJournal('Ozivil jsi |Ozivila jsi | jsi v ozivovani.');
-			Orion.SetGlobal("res",false);
-		}
-		Orion.Wait(100);
-	}
-}
-
-function ResWait(Limit)
-{
-	var start= Orion.Now();
-	var loop=start+parseInt(Limit);
-
-	while(loop>Orion.Now())
-	{
-		if(Orion.InJournal('Telo je prilis daleko.|duch neni ve|ozivil jsi|ozivila jsi','my|sys')){
-			Orion.ClearJournal('Telo je prilis daleko.|duch neni ve|ozivil jsi|ozivila jsi');
-			return;
-		}
-		Orion.Wait(300);
-	}
-}
 
 function Uklid()
 { // rozmery chest bednicky
