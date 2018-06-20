@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data version="0">
+    <replace originaltext="You put the Copper" originalcolor="0xFFFF" replacedtext=" Copper Ore" replacedcolor="0x099A" type="0" mode="0" fullmatch="false"/>
+    <replace originaltext="You put the Valorite" originalcolor="0xFFFF" replacedtext="Valo" replacedcolor="0x0985" type="0" mode="0" fullmatch="false"/>
+    <replace originaltext="You put the Obsidian" originalcolor="0xFFFF" replacedtext=" Obsid" replacedcolor="0x09BD" type="0" mode="0" fullmatch="false"/>
+    <replace originaltext="Ruth Dol Kel" originalcolor="0xFFFF" replacedtext="!! Paralyze !!" replacedcolor="0x0035" type="0" mode="0" fullmatch="false"/>
+</data>

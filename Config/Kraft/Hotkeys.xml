@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data version="1" size="24">
+    <hotkey type="3" action="4294967295" running_mode="false" key="112" modifiers="0" name="" external_code="Orion.Say(&quot;.berserker&quot;);"/>
+    <hotkey type="2" action="0" running_mode="false" key="113" modifiers="0" name="TargetNext" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="113" modifiers="2" name="TargetClosestRed" external_code=""/>
+    <hotkey type="2" action="4294967295" running_mode="false" key="114" modifiers="0" name="Bandage" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="112" modifiers="2" name="" external_code="Orion.Say(&quot;.recallhome&quot;);"/>
+    <hotkey type="16" action="21" running_mode="false" key="46" modifiers="16" name="" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="192" modifiers="2" name="SetTarg" external_code=""/>
+    <hotkey type="6" action="1" running_mode="false" key="1" modifiers="1" name="" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="114" modifiers="2" name="" external_code="SwitchArm(2);&#10;Orion.UseType(&quot;grafika&quot;);&#10;"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="121" modifiers="0" name="" external_code="Potion(&quot;heal&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="122" modifiers="0" name="" external_code="Potion(&quot;cure&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="123" modifiers="0" name="" external_code="Potion(&quot;invis&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="49" modifiers="0" name="" external_code="Orion.Say(&quot;all stop&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="50" modifiers="0" name="" external_code="Orion.Say(&quot;all come&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="51" modifiers="0" name="" external_code="Orion.Say(&quot;all kill&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="52" modifiers="0" name="" external_code="Orion.Say(&quot;all friend&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="38" modifiers="16" name="" external_code="Orion.Say(&quot;.jezdik&quot;);"/>
+    <hotkey type="2" action="0" running_mode="false" key="40" modifiers="16" name="Carv" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="192" modifiers="0" name="" external_code="Orion.Say(&quot;.resync&quot;);&#10;Orion.IgnoreReset();"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="48" modifiers="0" name="" external_code="Potion(&quot;nightsight&quot;);"/>
+    <hotkey type="10" action="5" running_mode="false" key="226" modifiers="0" name="" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="84" modifiers="2" name="" external_code="Orion.RemoveObject('pet');&#10;var tmp = Orion.AddObject('pet');&#10;while(Orion.HaveTarget())&#10;Orion.Wait(100);&#10;var tam = Orion.FindObject('pet');&#10;while(true)&#10;{&#10;&#9;Orion.WaitTargetObject(tam.Serial());&#10;&#9;Orion.UseSkill('Animal Taming');&#10;&#9;Orion.Wait(200);&#10;&#9;&#10;&#9;&#9;var x=Orion.WaitJournal('Nepovedlo se ti zvire ochocit', Orion.Now(), 0);&#10;&#9;Orion.Wait(100);&#10;}"/>
+    <hotkey type="2" action="0" running_mode="false" key="115" modifiers="0" name="" external_code=""/>
+</data>

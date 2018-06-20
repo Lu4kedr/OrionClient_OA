@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data version="0">
+    <main flags="7933432" messageslevel="2" searchdistance="4" usedistance="4" opencorpsedistance="2" corpsekeepdelay="5000" waittargetsdelay="100" moveitemsdelay="500" useitemsdelay="100" windowsopacity="100" usefontcolor="false" fontcolor="0x02B2" usecharactersfontcolor="false" charactersfontcolor="0x02B2" autoreconnect="false" autoreconnecttimer="60" doubleclickforopendoors="false"/>
+    <display type="3" flags="5" textcolor="0" backgroundcolor="0" titledata="UO - {name} ({server}) {barmiddle} {hp_maxhp} {mp_maxmp} {sp_maxsp} {armor} {weight_maxweight} {gold} {x} {y} {bandage}{Item}{Map}&#9;{valoOre}&#9;{adaOre}{obsOre}"/>
+    <hotkeys passhotkeys="false" commandprefix="_"/>
+    <scripts sortscripts="true" scriptfile="D:/Software/Ultima/Erebor/OA/Kraft.oajs"/>
+</data>

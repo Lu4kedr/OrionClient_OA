@@ -1,0 +1,174 @@
+function TailorSerpy() //zatrhnou priste otevirat zde
+{
+	var clothGraphic=0x175D; 
+	var siccorsGraphic=0x0F9E;
+	var bodyShashGraphic='0x153D|0x153B';//full apron
+	Orion.AddObject("material");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}	
+	var matros= Orion.FindObject("material");
+	Orion.UseObject(matros.Serial());
+	while(Orion.FindType(clothGraphic,'0xFFFF', matros.Serial()).length){
+	var cloth=Orion.FindType(clothGraphic,'0xFFFF', matros.Serial());
+	Orion.Wait(200);
+	Orion.MoveItem(cloth[0], 300, backpack);
+	Orion.Wait(300);
+	var clot=Orion.FindType(clothGraphic,'0xFFFF', backpack);
+	
+	Orion.CancelWaitTarget();
+	Orion.CancelTarget();
+	Orion.Wait(200);
+	Orion.WaitTargetObject(clot[0]);
+	Orion.Wait(200);
+	Orion.UseType(0x0F9D);
+	Orion.Wait(400);
+	var gum=Orion.GetLastGump();
+	Orion.Wait(200);
+	var hook=Orion.CreateGumpHook(2);
+	hook.AddCheck(101,true);
+	hook.AddEntry(1,"40");
+	gum.Select(hook);
+
+	
+	Orion.WaitJournal('Vyroba ukoncena.|Vyroba zrusena|stop', Orion.Now(), 0,'my|sys');
+	
+	var shash= Orion.FindType(bodyShashGraphic, '0xFFFF',backpack);
+	
+	for (var i = 0; i < shash.length; i++){
+		Orion.WaitTargetObject(shash[i]);
+		Orion.Wait(250);
+		Orion.UseType(siccorsGraphic);
+		Orion.Wait(350);
+	}
+	
+	var bandage=Orion.FindType(0x0E21,'0xFFFF', backpack);
+	Orion.Wait(200);
+	Orion.MoveItem(bandage[0],0, matros.Serial());
+	Orion.Wait(500);
+	}
+}
+
+function Alchemy(){
+
+	Orion.AddObject("material");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}	
+	var matros= Orion.FindObject("material");
+	Orion.RemoveObject("material");
+	Orion.Wait(200);
+	
+	while(true){
+		Orion.UseType(0x097B,0x0000,backpack,true);
+		Orion.UseType(0x097B,0x0000,backpack,true);
+		Orion.Cast('night sight',self);
+		Orion.Wait(2500);
+		Orion.Wait(400);
+		var emptybottles=Orion.FindType(0x0F0E,0x0000,matros.Serial());
+		if(!emptybottles){
+			Orion.Say(".afkk");
+			Orion.Print("Dosly Prazdne lahve");
+			return;
+		}
+		Orion.MoveItem(emptybottles[0],100, backpack);
+	
+		Orion.UseType(0x0E9B, 0x0000, backpack,true);
+		Orion.Wait(500);
+		var gum=Orion.GetLastGump();
+		Orion.Wait(200);
+		var hook=Orion.CreateGumpHook(2);
+		hook.AddCheck(100,true);
+		hook.AddEntry(1,"100");
+		gum.Select(hook);
+		
+		Orion.Wait(1000);
+	
+		var work=Orion.WaitJournal('Vyrabim ', Orion.Now(), Orion.Now()+10000, 'my|sys');
+		while(work){
+			work=Orion.WaitJournal('Vyrabim ', Orion.Now(), Orion.Now()+10000, 'my|sys');
+		}
+		emptybottles=Orion.FindType(0x0F0E,0xFFFF,backpack);
+		for(var i=0;i<emptybottles.length;i++){
+			Orion.MoveItem(emptybottles[i],100, matros.Serial());
+			Orion.Wait(500);
+		}
+	}
+}
+
+function Inscription()
+{
+	var radek=1;
+	Orion.AddObject("material");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}	
+	var matros= Orion.FindObject("material");
+	Orion.RemoveObject("material");
+	Orion.Wait(200);
+	while(true)
+	{
+		Orion.WarMode(false);
+		Orion.UseType(0x097B,0x0000,backpack,true);
+		Orion.UseType(0x097B,0x0000,backpack,true);
+		Orion.Say('int:');
+		Orion.Cast('night sight',self);
+		Orion.Wait(2500);
+		while(Player.Mana()<Player.MaxMana())
+		{
+			Orion.UseSkill('Meditation');
+			Orion.Wait(500);
+		}
+		var blk=Orion.FindType(0x0E34,0x0000,backpack);
+		if(blk.length<1)
+		{
+			var blanky=Orion.FindType(0x0E34,0x0000,matros.Serial());
+			if(!blanky){
+				Orion.Say(".afkk");
+				Orion.Print("Dosly Prazdne lahve");
+				return;
+			}
+			Orion.MoveItem(blanky[0],100, backpack);
+			Orion.Wait(500);
+		}
+
+	
+		Orion.UseType('0x0E34', '0x0000', backpack);
+		Orion.Wait(500);
+		var gum=Orion.GetLastGump();
+		Orion.Wait(200);
+		var hook=Orion.CreateGumpHook(2);
+		hook.AddCheck(100*radek,true);
+		hook.AddEntry(1,"100");
+		gum.Select(hook);
+		
+		Orion.Wait(1000);
+	
+		var work=Orion.WaitJournal('Vyrabim ', Orion.Now(), Orion.Now()+10000, 'my|sys');
+		while(work){
+			work=Orion.WaitJournal('Vyrabim ', Orion.Now(), Orion.Now()+10000, 'my|sys');
+		}
+		var recally=Orion.FindType(0x1F4C,0x0000,backpack);//recally
+		for(var i=0;i<recally.length;i++){
+			Orion.MoveItem(recally[i],0, matros.Serial());
+			Orion.Wait(500);
+		}
+	}
+}
+
+function afk()
+{
+
+	while(true){
+		
+		Orion.WaitJournal('afk|Afk|AFK|kontrola|Kontrola|KONTROLA|Gm|GM|attacking', Orion.Now(),0);
+		
+		Orion.PlayWav('C:\afk.wav');
+		Orion.Wait(300);
+		Orion.PlayWav('C:\afk.wav');
+		Orion.Wait(1000);
+	}
+}

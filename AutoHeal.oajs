@@ -1,0 +1,172 @@
+
+var any = 0xFFFF;
+//Orion.SetGlobal('CanHeal',true);
+//Orion.SetGlobal('FailSafe',Orion.Now()+6500);
+
+function settTrue()
+{
+Orion.SetGlobal('CanHeal',true);
+}
+function settFalse()
+{
+Orion.SetGlobal('CanHeal',false);
+}
+
+function bandage(){
+	Bandage(lasttarget, false, false);
+}
+
+// overi zda muze lecit-> overi vzdálenost cíle-> pouzije prislusne bandy
+function BandageTarget(Serial, BloodBandage,OverRide)
+{
+	
+	if(Orion.Now()>Orion.GetGlobal('bandageStart'))
+	{
+		Orion.SetGlobal('bandageDone',true);
+		Orion.Wait(100);
+	}
+	if(!OverRide){
+		if(Orion.GetGlobal('bandageDone')==='false')
+		{
+			EquipWeap();
+			return;
+		}
+	}
+	var serial=self;
+	if(Serial){
+		serial=Serial;
+	}else{
+		if(Player.Hits()==Player.MaxHits()){
+			EquipWeap();
+			return;
+		}
+	}
+	var start=Orion.Now();
+	Orion.CancelTarget();
+	Orion.CancelWaitTarget();
+	if(!BloodBandage){
+		Orion.UseType(0x0E21); //ciste bandy
+		Orion.WaitTargetObject(serial);
+	}
+	else{
+		Orion.UseType(0x0E20); // krvave bandy
+		Orion.WaitTargetObject(serial);
+	}
+	Orion.Wait(100);
+	EquipWeap();
+	Orion.Wait(100);
+	if(Orion.InJournal('Pokousis se vylecit','my|sys',0,any,start,Orion.Now()+100)){
+		Orion.ClearJournal('Pokousis se vylecit');
+		Orion.Print('Bandim');
+		Orion.SetGlobal('bandageDone',false);
+		Orion.SetGlobal('bandageStart',Orion.Now()+6500);
+
+	}
+}
+
+function IsShieldEquiped(_private){
+	var shields='0x1B76|0x1B77|0x1B7B';
+	var lhand = Orion.ObjAtLayer('LeftHand');
+	if(!lhand)return false;
+	for(var i=0;i<shields.length;i++){
+		if(lhand.Graphic()==shields[i]){
+			return true;
+		}
+	}
+	return false;
+}
+function EquipWeap()
+{
+	var lhand = Orion.ObjAtLayer('LeftHand');
+	var rhand = Orion.ObjAtLayer('RightHand');
+	if(!rhand){
+		if(!lhand){
+			Orion.Arm(Orion.GetGlobal("weap"));
+		}
+		if(IsShieldEquiped()){
+			Orion.Arm(Orion.GetGlobal("weap"));
+		}
+	}
+}
+
+
+function JournalCheck()
+{
+	Orion.Wait(1500);
+	Orion.ClearJournal();
+	var expstart=GetActualExp();
+	var startTime=Orion.Now();
+	while(true)
+	{
+		Orion.Wait(100);
+		if(Orion.InJournal('#500876|uspesne osetren|Leceni se ti nepovedlo.| neni zranen.| krvacet.| Nevidis cil.| moc daleko.','my|sys')!=null)
+		{
+			Orion.ClearJournal('#500876|uspesne osetren|Leceni se ti nepovedlo.| neni zranen.| krvacet.| Nevidis cil.| moc daleko.');
+			Orion.SetGlobal("CanHeal",true);
+		}
+		
+		if(Orion.InJournal('exp?','my')!=null)
+		{
+			Orion.ClearJournal('exp?');
+			var xp=GetActualExp();
+			var xpp= (xp.Min - expstart.Min).toFixed(1);
+			Orion.Print("Ziskano "+xpp+" zkusenosti.");
+			//Orion.Print("Zabitých "+Orion.GetGlobal('killCnt').toString()+" monster.");
+			var cas=((Orion.Now()-startTime)/60000).toFixed(2);
+			var prum=(xpp/cas).toFixed(2);
+			Orion.Print("Prumerne "+ prum + " expu za minutu.");
+			Orion.Print("Celkovy cas: "+cas+" minut.");
+		}
+		var txt=Orion.InJournal('Anna Tir Esgal');
+		if(txt!=null)
+		{
+			Orion.ClearJournal('Anna Tir Esgal');
+			var params=
+			[
+			txt.Serial(),1000,4,"Zed za ",15
+			]
+			Orion.Exec('CustomCountDown',false,params);
+		}
+		var txt=Orion.InJournal('Anna Tir Kemen');
+		if(txt!=null)
+		{
+			Orion.ClearJournal('Anna Tir Kemen');
+			var params=
+			[
+			txt.Serial(),1000,6,"Zed za ",15
+			]
+			Orion.Exec('CustomCountDown',false,params);
+		}
+		var txt=Orion.InJournal('Ruth Fuin Val','my');
+		if(txt!=null)
+		{
+			Orion.ClearJournal('Ruth Fuin Val');
+			var params=
+			[
+			txt.Serial(),800,3,"",19
+			]
+			Orion.Exec('CustomCountDown',false,params);
+		}
+		var txt=Orion.InJournal('gatah','sys');
+		if(txt!=null)
+		{
+			Orion.ClearJournal('gatah');
+			
+			var rune =Orion.FindType('0x1F14', '0x0005','backpack');
+			
+			Orion.Cast('Gate Travel', rune);
+		}
+	}
+}
+
+function GetActualExp()
+{
+	Orion.Say(".explevel");
+	Orion.Wait(200);
+	var gum=Orion.GetLastGump();
+	var exp=gum.Text(2);
+	gum.Select(Orion.CreateGumpHook(0));
+	var expS=exp.split('/');
+	var rtn= {Min: expS[0], Max: expS[1]};
+	return rtn;
+}

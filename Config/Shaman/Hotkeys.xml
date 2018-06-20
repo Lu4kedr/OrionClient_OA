@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data version="1" size="51">
+    <hotkey type="3" action="4294967295" running_mode="false" key="115" modifiers="0" name="" external_code="BandCast('Energy Bolt',lasttarget);"/>
+    <hotkey type="2" action="0" running_mode="false" key="192" modifiers="2" name="SetTarg" external_code=""/>
+    <hotkey type="2" action="4294967295" running_mode="false" key="114" modifiers="0" name="Bandage" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="112" modifiers="0" name="VooDooObet" external_code=""/>
+    <hotkey type="2" action="0" running_mode="true" key="81" modifiers="2" name="BloodPact" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="38" modifiers="16" name="" external_code="Orion.Say(&quot;.jezdik&quot;);"/>
+    <hotkey type="2" action="0" running_mode="false" key="113" modifiers="0" name="TargetNext" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="113" modifiers="2" name="TargetClosestRed" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="88" modifiers="2" name="SwitchTarget" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="116" modifiers="0" name="" external_code="BandCast('frostbolt',lasttarget);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="117" modifiers="0" name="" external_code="BandCast('Paralyze',lasttarget);"/>
+    <hotkey type="2" action="0" running_mode="false" key="120" modifiers="0" name="OpenDoor" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="121" modifiers="0" name="" external_code="Potion(&quot;heal&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="122" modifiers="0" name="" external_code="Potion(&quot;cure&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="123" modifiers="0" name="" external_code="Orion.Say(&quot;ů&quot;);&#10;Potion(&quot;invis&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="83" modifiers="2" name="" external_code="Orion.Say(&quot;.standcast&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="48" modifiers="0" name="" external_code="BandCast('Night Sight',self);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="49" modifiers="0" name="" external_code="Orion.Say(&quot;all stop&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="50" modifiers="0" name="" external_code="Orion.Say(&quot;all come&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="51" modifiers="0" name="" external_code="Orion.Say(&quot;all kill&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="52" modifiers="0" name="" external_code="Orion.Say(&quot;all friend&quot;);"/>
+    <hotkey type="2" action="0" running_mode="false" key="53" modifiers="0" name="AddProvo" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="54" modifiers="0" name="Provo" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="55" modifiers="0" name="" external_code="BandCast(&quot;Reactive Armor&quot;,self);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="187" modifiers="0" name="" external_code="Potion(&quot;refresh&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="219" modifiers="0" name="" external_code="Potion(&quot;mobility&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="221" modifiers="0" name="" external_code="Potion(&quot;reflex&quot;);"/>
+    <hotkey type="18" action="9" running_mode="false" key="2" modifiers="1" name="" external_code="Entic(lasttarget);"/>
+    <hotkey type="2" action="0" running_mode="false" key="8" modifiers="64" name="Hid" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="57" modifiers="0" name="" external_code="VoodooBoost(&quot;int&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="56" modifiers="0" name="" external_code="VoodooBoost(&quot;ar&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="226" modifiers="0" name="" external_code="BandCast(&quot;Harm&quot;,self);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="82" modifiers="2" name="" external_code="Res(true);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="112" modifiers="2" name="" external_code="Orion.WarMode(false);&#10;Orion.Say(&quot;.recallhome&quot;);"/>
+    <hotkey type="9" action="22" running_mode="false" key="4" modifiers="1" name="" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="84" modifiers="2" name="Telep" external_code=""/>
+    <hotkey type="11" action="7" running_mode="false" key="55" modifiers="2" name="" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="40" modifiers="16" name="Carv" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="39" modifiers="16" name="" external_code="Orion.Say(&quot;.voodoovit&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="37" modifiers="16" name="" external_code="Orion.Say(&quot;.voodooint&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="192" modifiers="0" name="" external_code="Orion.Say(&quot;.resync&quot;);&#10;Orion.IgnoreReset();&#10;GetStatus();"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="114" modifiers="2" name="Telep" external_code=" switchArm(2);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="87" modifiers="2" name="" external_code="BandCast(&quot;Energy Field&quot;);"/>
+    <hotkey type="2" action="0" running_mode="false" key="69" modifiers="2" name="TrackPlayers" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="68" modifiers="2" name="" external_code="BandCast(&quot;Dispel&quot;)"/>
+    <hotkey type="16" action="8" running_mode="false" key="70" modifiers="2" name="" external_code=""/>
+    <hotkey type="10" action="54" running_mode="false" key="65" modifiers="2" name="" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="66" modifiers="2" name="" external_code="&#9;&#9;if(Orion.GetGlobal(&quot;sh&quot;)=='false')&#10;&#9;&#9;{&#10;&#9;&#9;Orion.BandageSelf();&#10;&#9;&#9;}&#10;&#9;&#9;else{&#10;&#9;&#9;&#9;Orion.UseType(0x0E20);&#10;&#9;&#9;&#9;Orion.WaitTargetObject(lasttarget);&#10;&#9;&#9;}"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="53" modifiers="2" name="" external_code="BandCast(&quot;Mind Blast&quot;,lasttarget);"/>
+    <hotkey type="11" action="12" running_mode="false" key="1" modifiers="1" name="" external_code=""/>
+</data>

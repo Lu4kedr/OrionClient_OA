@@ -1,0 +1,196 @@
+function CutTreeByWorldLoc()
+{
+	Orion.ClearJournal();
+	var treeWorldLocation = FindTreesInSurrArea();
+	for(i=0;i<treeWorldLocation.length;i++){
+		Orion.WalkTo(treeWorldLocation[i][0],treeWorldLocation[i][1],0);
+		Orion.Wait(200);
+		if(Player.Stam()<60)
+			Potion("refresh");
+		Orion.Wait(200);
+		Orion.Say(".vigour");
+		var crystal=true;
+		var minEnd= Orion.Now()+3300;
+		while(LumberF(treeWorldLocation[i][0],treeWorldLocation[i][1]))
+		{
+			if(crystal==true)
+			{
+				crystal=false;
+				Orion.Say(".vigour");
+			}
+			var coprOre=Orion.FindType('0x1BDD', '0x0000','backpack');
+			if(coprOre!='')
+			{
+				Orion.DropHere(coprOre);
+			}
+			Orion.Wait(500);
+			
+		}
+		if(Orion.Now()<minEnd)
+		{
+			Orion.Wait(minEnd-Orion.Now());
+		}
+		Orion.Wait(500);
+		if(crystal==true)
+			{
+				crystal=false;
+				Orion.Say(".vigour");
+			}	
+		if(Player.Weight() >=  Player.MaxWeight()-50){
+			Orion.PlayWav('c:\afk.wav');	
+			Orion.Print("Plna VAHA");
+			break;
+		}
+	}
+	Orion.PlayWav('c:\afk.wav');	
+	Orion.Print("VYTEZENO");
+}
+
+function FindTreesInSurrArea()
+{	
+	var maxSearchDistance=30;
+	var treeWorldLocations=createArr(400,2);
+	var trueWorldLocCounter=0;
+	
+	for(i=(Player.X()-maxSearchDistance);i<(Player.X()+maxSearchDistance+1);i++){
+		for(j=(Player.Y()-maxSearchDistance);j<(Player.Y()+maxSearchDistance+1);j++){
+			//Orion.Print("Searching X= " + i + "and Y= " + j + " location");
+			if(Orion.ValidateTargetTile('tree', i, j)){
+				Orion.Print("Found a tree, location is saved as " + (trueWorldLocCounter+1));
+				treeWorldLocations[trueWorldLocCounter][0]=i;
+				treeWorldLocations[trueWorldLocCounter][1]=j;
+				trueWorldLocCounter++;
+			}	
+		}
+	}
+	treeWorldLocations.length=trueWorldLocCounter;
+	treeWorldLocations.sort(CompareDist);
+	return treeWorldLocations;
+}
+
+function CompareDist(a,b) {
+	
+  if (Orion.GetDistance(a[0],a[1]) < Orion.GetDistance(b[0],b[1]))
+    return -1;
+  if (Orion.GetDistance(a[0],a[1]) > Orion.GetDistance(b[0],b[1]))
+    return 1;
+  return 0;
+}
+
+function createArr(x, y) {
+    var arr = new Array(x);
+
+    for (var i = 0; i < x; i++) {
+        arr[i] = new Array(y);
+    }
+
+    return arr;
+}
+
+function LumberF(x,y)
+{
+	var text = ' no logs |blow| prilis daleko.| moc daleko.|too far|Tam nedosahnes.|immune|cannot reach|pouzit skill|You put | nepodarilo kvalitne odseknout';
+//	var succ ='You put | nepodarilo kvalitne odseknout.';
+//	var skill= 'Jeste nemuzes pouzit skill';
+	while (!Player.Dead()){
+		AfkCheck();
+		EnemyCheck();
+		
+		Orion.UseType('0x0F48');
+		Orion.WaitTargetTile('tree',x,y,0);
+
+		var msg = Orion.WaitJournal(text, Orion.Now(), Orion.Now() + 7000, 'sys|my');
+		//Orion.Print(msg.Text());
+
+		//if(msg !=null)	break;
+		if(msg==null) 
+		{
+			Orion.Print('msg null');
+			Orion.ClearJournal(text);
+			return false;
+		}
+		
+		Orion.Print(msg.Text());
+		if(Orion.InJournal('pouzit skill','my|sys'))
+		{
+			Orion.Wait(5555);
+			Orion.ClearJournal(text);
+			return true;
+		}
+		if(Orion.Contains(msg.Text(),'You put| nepodarilo kvalitne odseknout.'))
+		{
+			//Orion.Print('msg DONE');
+			Orion.ClearJournal(text);
+			Orion.Wait(300);
+			return true;
+		}
+
+		Orion.Wait(100);
+		if(msg !=null)	break;
+		}
+		//Orion.Print('While end');
+	Orion.ClearJournal(text);
+	return false;
+}
+
+function AfkCheck()
+{
+	if(Orion.InJournal('afk|AFK|kontrola|GM|gm|Je spatne videt.'))
+	{
+		Orion.ClearJournal('afk|AFK|kontrola|GM|gm|Je spatne videt.');
+		Orion.PlayWav('c:\afk.wav');
+	}
+}
+function EnemyCheck()
+{
+	var enemy = Orion.FindType('-1', '-1', ground, 'near|mobile', '16','murderer');
+	if(enemy.length<1)
+	{
+		return;
+	}
+	Orion.PlayWav('c:\afk.wav');
+	var weapon= Orion.FindType('0x1406|0x1407', '0xFFFF', 'backpack');
+	Orion.Equip(weapon[0]);
+	AttackNearestMonster();
+	Orion.UseType('0x0E85|0x0E86', '0xFFFF', 'backpack',true);
+}
+
+function AttackNearestMonster()
+{ 
+    //Add your pets to your friendlist.they might get attacked by you unless they are in your friendlist.
+    //Ignoring self and friendlisted entities
+    Orion.Ignore('self');
+
+    //Finds Monster in 15 tiles starting from closest 
+    var creatures = Orion.FindType('!0x0190|!0x0191','0xFFFF', ground, 'near|mobile|ignorefriends', '15', 'gray|red|criminal|blue|enemy'); 
+    if (!creatures.length)
+    {
+        Orion.Print( '-1', 'no creature found, resetting ignore list');
+        Orion.IgnoreReset();
+        return '';
+    }
+    Orion.RemoveObject("target");
+    Orion.AddObject("target",creatures[0]);
+    var target = Orion.FindObject("target");
+
+    //Runs to the target
+    Orion.WalkTo(target.X(),target.Y(),0);
+    Orion.WaitTargetObject("target");
+
+    //Invokes honor virtue on target
+   // Orion.InvokeVirture('Honor');
+
+    //Attacks the target
+    Orion.Attack("target");
+
+    //Keep following the target until it dies
+    while(target.Exists()){
+        Orion.WalkTo(target.X(),target.Y(),0);
+        Orion.Wait(100);
+        }
+    Orion.Wait(500);
+
+    //Loots the corpse using the loot function that can be found on Orion forums written by Hotride.
+    //You may use any working loot fuction by changing the lines below.
+   // FastLootRPG();
+}

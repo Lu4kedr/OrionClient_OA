@@ -1,0 +1,766 @@
+// KRAFT 
+var mineLocationsState={}; // key=x,y value: lastMinetime
+var oreType = '0x19B7';
+
+var alarmPath='c:\\afk.wav';
+var limitStam=60; // 0 pro nepiti refek
+var miningLogFilePath = 'D:\\Software\\Ultima\\Erebor\\OA\\mining.txt';
+
+var oreRefreshInterval = 1000; // Seconds
+
+var bankEq='.equip14';
+var weaponGraphic='0x1406|0x1407';
+
+var HomeLoc={x:2730,y:3272};
+var mineRuneBoxes=[0x40051C2F,0x4003F77D];
+var runeSerial=0x40055F36;
+
+var orePath=[0x400536AD];
+var oreBox=0x40073D4E;
+
+var gemsPath=[0x400536AD];
+var gemsBox=0x400209EF;
+
+var resourcesPath=[0x400536AD];
+var resourcesBox=0x400470BB;
+
+var resources=[ //Graphic, Color, Minimum Amount
+	{Graphic:0x0F0E,Color:0x0160,Minimum:2},//GH
+	{Graphic:0x0F0E,Color:0x0447,Minimum:2},//invis
+	{Graphic:0x1F4C,Color:0x0000,Minimum:10},//recall
+	{Graphic:'0x0E86|0x0E85',Color:0x0,Minimum:1},//pickaxe
+	{Graphic:0x0F0E,Color:'0x0027|0x00ED',Minimum:20},//refresh
+	{Graphic:'0x1406|0x1407',Color:0xFFFF,Minimum:1},//warmace
+	{Graphic:0x0E21,Color:0x0000,Minimum:15}//bandage
+];
+
+function LoadMineToFile(){
+	Orion.Print("Scanuju okoli, prosim vyckete...");
+	var data= FindMine(60);
+	for(var d=0;d<data.length;d++){
+		SaveMineLocationsState(data[d].x, data[d].y);
+	}
+	Orion.Print("Hotovo");
+}
+
+
+function LoadMineLocationsState(__private) {
+    var file = Orion.NewFile();
+    file.Open(miningLogFilePath);
+    var line = file.ReadLine();
+    var cnt=0;
+    while (line) {
+        var values = line.split(' ');
+        var lastMineTime = parseInt(values[1]);
+
+        if (!mineLocationsState[values[0]] || (mineLocationsState[values[0]] > lastMineTime)) {
+            mineLocationsState[values[0]] = lastMineTime;
+        }
+	cnt=cnt+1;
+        line = file.ReadLine();
+    }
+    file.Close();
+    Orion.Print("Nacteno "+cnt+" radku ze suboru");
+}
+
+function SaveMineLocationsState(x, y) {
+    var key = x + ',' + y;
+    var now = Orion.Now();
+    mineLocationsState[key] = now;
+
+    var file = Orion.NewFile();
+    file.Append(miningLogFilePath);
+    file.Write(key + ' ' + now + '\n');
+    file.Close();
+}
+
+function SaveMineLocationsStates(__private) {
+
+	var keys=Object.keys(mineLocationsState);
+	Orion.Print(keys.length);
+   	var file = Orion.NewFile();
+   	file.Remove(miningLogFilePath);
+   	file.Append(miningLogFilePath);
+	for(var i=0;i<keys.length;i++){
+		    file.Write(keys[i] + ' ' + mineLocationsState[keys[i]] + '\n');
+	}
+	file.Close();
+}
+
+function CanDigLocation(key) {
+   // var key = x + ',' + y;
+    var now = Orion.Now();
+
+    var r = !mineLocationsState[key] || ((now - mineLocationsState[key]) / 1000 > oreRefreshInterval || (now - mineLocationsState[key]) <0);
+	//Orion.Print(mineLocationsState[key]+", "+Orion.Now());
+    if (!r) {
+      //  Orion.Print('Skipping location: ' +key);
+    }
+
+    return r;
+}
+function GetDist(x,y){
+	var px=Player.X();
+	var py=Player.Y();
+	var a=px-x;
+	var b=py-y;
+	var rtn=Math.sqrt( a*a + b*b );
+	return rtn;
+}
+function CompareMineFields(a,b){
+
+	var valA= a.split(',');
+	var valB= b.split(',');
+	var distA= GetDist(valA[0], valA[1]);
+	var distB= GetDist(valB[0], valB[1]);
+	if (distA<distB) {
+    		return -1;
+  	}
+  	if (distA>distB) {
+    		return 1;
+  	}
+  	return 0;
+}
+
+function GetMineableTile(__private){
+	var keys=Object.keys(mineLocationsState).filter(function (loc) { 
+			//Orion.Print(loc);
+           		return CanDigLocation(loc);
+       	}); 
+	//keys.sort(CompareMineFields);
+	
+	var num=Orion.Random(0, keys.length);
+	return keys[num];
+}
+function FilterMined(__private){
+	var keys=Object.keys(mineLocationsState).filter(function (loc) { 
+			//Orion.Print(loc);
+           		return CanDigLocation(loc);
+       	}); 
+	//keys.sort(CompareMineFields);
+	//Orion.Print(keys[0]+" AHA");
+	return keys;
+}
+
+
+function FindMine(range)
+{
+    var d = range;
+    
+    var treeCoords = [];
+    
+    var found = 0;
+    
+    for (x = Player.X() - d; x < Player.X() + d; ++x)
+    {
+        for (y = Player.Y() - d; y < Player.Y() + d; ++y)
+        {
+            if (Orion.ValidateTargetTile('mine', x, y))
+            {
+                //Orion.Print('Mine at ' + x + ',' + y);
+            
+                var coord = { x: x, y: y};            
+                treeCoords.push(coord);
+            
+                found++;                
+            }
+        }
+    
+    }
+    
+    Orion.Print('Found ' + found + ' mine');
+    return treeCoords;
+}
+
+
+function Mine()
+{
+	Orion.SetGlobal("weap",1);
+	Orion.SetGlobal("nextMine",Orion.Now());
+	Orion.ClearJournal();
+	LoadMineLocationsState(); // nacteni dolu ze souboru
+
+	var mineCoord=[
+		{x:0,y:0},
+		{x:-1,y:-1},
+		{x:0,y:-1},
+		{x:1,y:-1},
+		{x:1,y:0},
+		{x:1,y:1},
+		{x:0,y:1},
+		{x:-1,y:1},
+		{x:-1,y:0}
+	];
+	while(true)
+	{
+		Orion.Print("Zpracovavam data...");
+		//var mineFieldKeys =FilterMined();// SortByDistance()
+       	Orion.Print("Makam...");
+       	var px=Player.X();
+       	var py=Player.Y();
+       	var mineTmp=false;
+		for(var i=0;i<mineCoord.length;i++)
+		{
+			var mineFieldKeys =FilterMined();
+			Orion.Wait(100);
+			var coordText=(px+mineCoord[i].x)+','+(py+mineCoord[i].y);
+			//if(mineLocationsState[coordText]==null)continue;// neni nacteno v souboru
+			//Orion.Print(mineFieldKeys.indexOf(coordText));
+			if(mineFieldKeys.indexOf(coordText)==-1){
+				continue; // neplatni timer
+			}
+			mineTmp=true;
+			var coord=coordText.split(',');
+			if(Player.Dead()){
+				Orion.Say("pro pokracovani napis start");
+				Orion.Wait(500);
+				Orion.WaitJournal('start', Orion.Now(), 0, 'my');
+			}
+			AfkCheck();
+			EnemyCheck();
+			if(Walk(coord[0],coord[1]))
+			{
+				while(Orion.Now()<Orion.GetGlobal("nextMine"))Orion.Wait(100);
+				mine();
+			}
+			else{
+				Orion.Print("Walk error");
+			}
+			mineLocationsState[coordText]=Orion.Now();
+			if(OreWeightCheck(4,1))
+			{
+				var acX=Player.X();
+				var acY=Player.Y();
+				Recall('home');
+				Unload();
+				Orion.Wait(500);
+				Walk(acX,acY);
+			}
+		}
+		if(!mineTmp){
+		
+			Orion.Print("V Pasti! Hledam kde lze kopat");
+			var gt=GetMineableTile();
+			var coord=gt.split(',');
+			Walk(coord[0],coord[1]);
+		}
+		SaveMineLocationsStates();
+
+	}
+
+//bckup
+/*
+while(true)
+	{
+		Orion.Print("Zpracovavam data...");
+		//var mineFieldKeys =FilterMined();// SortByDistance()
+       	Orion.Print("Makam...");
+       	var px=Player.X();
+       	var py=Player.Y();
+       	var mineTmp=false;
+		for(var i=0;i<mineCoord.length;i++)
+		{
+			var mineFieldKeys =FilterMined();
+			Orion.Wait(100);
+			var coordText=(px+mineCoord[i].x)+','+(py+mineCoord[i].y);
+			//if(mineLocationsState[coordText]==null)continue;// neni nacteno v souboru
+			//Orion.Print(mineFieldKeys.indexOf(coordText));
+			if(mineFieldKeys.indexOf(coordText)==-1){
+				continue; // neplatni timer
+			}
+			mineTmp=true;
+			var coord=coordText.split(',');
+			if(Player.Dead()){
+				Orion.Say("pro pokracovani napis start");
+				Orion.Wait(500);
+				Orion.WaitJournal('start', Orion.Now(), 0, 'my');
+			}
+			AfkCheck();
+			EnemyCheck();
+			if(Walk(coord[0],coord[1]))
+			{
+				while(Orion.Now()<Orion.GetGlobal("nextMine"))Orion.Wait(100);
+				mine();
+			}
+			else{
+				Orion.Print("Walk error");
+			}
+			mineLocationsState[coordText]=Orion.Now();
+			if(OreWeightCheck(4,1))
+			{
+				var acX=Player.X();
+				var acY=Player.Y();
+				Recall('home');
+				Unload();
+				Orion.Wait(500);
+				Walk(acX,acY);
+			}
+		}
+		if(!mineTmp){
+		
+			Orion.Print("V Pasti! Hledam kde lze kopat");
+			var gt=GetMineableTile();
+			var coord=gt.split(',');
+			Walk(coord[0],coord[1]);
+		}
+		SaveMineLocationsStates();
+
+	}
+*/
+}
+
+function Potion(neco){
+	Orion.Say(".potionrefresh");
+}
+function Recall(rune)
+{
+	var x=Player.X();
+	var y=Player.Y();
+	while(true){
+	
+			if(Orion.Contains(rune,'home')){
+				if(Player.Mana()>19){
+					Orion.Say(".recallhome");
+					Orion.Wait(100);
+					Orion.WaitJournal('Kouzlo se nezdarilo.', Orion.Now(), Orion.Now()+12000, 'my|sys');
+				}
+				else{
+					if(Player.WarMode())
+						Orion.WarMode(false);
+					Orion.UseSkill("Meditation");
+					Orion.Wait(1500);
+				}
+			}
+			else{
+			{
+				for(var b=0;b<mineRuneBoxes.length;b++){
+					Orion.OpenContainer(mineRuneBoxes[b]);
+					Orion.Wait(300);
+				}
+				var run=Orion.FindObject(runeSerial);
+				var recallSc=Orion.FindType('0x1F4C', '0x0000', 'backpack', '-1', '-1','-1', true);
+				Orion.Wait(200);
+				if(!recallSc){
+					Orion.Print("nemas recally, Vypinam");
+					Orion.Terminate('all');
+				}
+				var recal=Orion.FindObject(recallSc[0]);
+				if(Player.Mana()>19){
+					Orion.WaitTargetObject(run.Serial());
+					Orion.UseObject(recal.Serial());
+					Orion.Wait(100);
+					Orion.WaitJournal('Kouzlo se nezdarilo.', Orion.Now(), Orion.Now()+12000, 'my|sys');
+				}
+				else{
+					if(Player.WarMode())
+						Orion.WarMode(false);
+					Orion.UseSkill("Meditation");
+					Orion.Wait(1500);
+				}
+			}
+		}
+		if(x!=Player.X() && y!=Player.Y()) break;
+	}
+}
+function AfkCheck()
+{
+	if(Orion.InJournal('afk|AFK|kontrola|GM|gm|Je spatne videt.'))
+	{
+		if(Orion.InJournal('Je spatne videt.'))
+		{
+			Orion.UseType('0x0A18');
+		}
+		Orion.ClearJournal('afk|AFK|kontrola|GM|gm|Je spatne videt.');
+		Orion.PlayWav(alarmPath);
+	}
+}
+function EnemyCheck()
+{
+	var enemy = Orion.FindType('-1', '-1', ground, 'near|mobile', '18','murderer');
+	if(enemy.length<1)
+	{
+		return;
+	}
+	Orion.RequestName(enemy[0],500);
+	var enem=Orion.FindObject(enemy[0]);
+	Orion.PlayWav(alarmPath);
+	if(enem.Graphic()=='0x0191' || enem.Graphic()=='0x0190' || Orion.Contains(enem.Name(),'Spirit|Golem')){
+	//if enemy player //TODO
+		Orion.Say(".potioninvis");
+		Orion.Wait(100);
+		Orion.Say(".recallhome");
+		Orion.Wait(10000);
+		Orion.Print("vypinam vse");
+		Orion.Terminate('all');
+	}
+	enem=null;
+	var weapon= Orion.FindType(weaponGraphic, '0xFFFF', 'backpack');
+	Orion.Equip(weapon[0]);
+	AttackNearestMonster();
+	//Orion.UseType('0x0E85|0x0E86');
+}
+function Unload()
+{
+	OpenDoor();
+	Orion.Wait(500);
+	Walk(HomeLoc.x,HomeLoc.y);
+	Orion.UseFromGround('0x097B', '0x0000', 4);
+	Orion.UseFromGround('0x097B', '0x0000', 4);
+	Orion.UseFromGround('0x097B', '0x0000', 4);
+	ManageResources();
+	Orion.Wait(500);
+	Recall('mine');
+	
+}
+function ManageResources()
+{
+	Bank();
+	Orion.Wait(500);
+	for(var p=0;p<orePath.length;p++){
+		Orion.OpenContainer(orePath[p], 1000);
+		Orion.Wait(200);
+	}
+	Orion.OpenContainer(oreBox, 1000);
+	var or=Orion.FindType(oreType,'0xFFFF','backpack');
+	for(var i=0;i<or.length;i++)
+	{	
+		Orion.MoveItem(or[i], 0, oreBox);
+		Orion.Wait(200);
+	}
+	
+	for(var p=0;p<gemsPath.length;p++){
+		Orion.OpenContainer(gemsPath[p], 1000);
+		Orion.Wait(200);
+	}
+	Orion.OpenContainer(gemsBox, 1000);
+	var or=Orion.FindList('LotGems', 'backpack');
+	for(var i=0;i<or.length;i++)
+	{	
+		Orion.MoveItem(or[i], 0, gemsBox);
+		Orion.Wait(200);
+	}
+	
+	for(var p=0;p<resourcesPath.length;p++){
+		Orion.OpenContainer(resourcesPath[p], 1000);
+		Orion.Wait(200);
+	}
+	Orion.OpenContainer(resourcesBox, 1000);
+	for(var r=0;r<resources.length;r++){
+		//dodelat nabirani resources  resources=[ //Graphic, Color, Minimum Amount
+		var item=Orion.FindType(resources[r].Graphic,resources[r].Color,'backpack');
+		if(item.length>=resources[r].Minimum)continue;
+		if(Orion.Count(resources[r].Graphic,resources[r].Color,'backpack')>=resources[r].Minimum)continue;
+		item=Orion.FindType(resources[r].Graphic,resources[r].Color,resourcesBox);
+		
+		Orion.MoveItem(item[0],resources[r].Minimum, 'backpack');
+		Orion.Wait(200);
+	}
+	Orion.Wait(500);
+}
+
+function OreWeightCheck(obsLimit,adaLimit)
+{
+	var rtn=false;
+	if(Player.Weight()+15>Player.MaxWeight())rtn= true;
+	if(Orion.Count(oreType, '0x09BD', 'backpack')>=obsLimit)rtn= true;
+	if(Orion.Count(oreType, '0x0026', 'backpack')>=adaLimit)rtn= true;
+	return rtn;
+}
+
+function Walk(X,Y)
+{
+	Orion.WalkTo(X,Y,Player.Z());
+	var px=Player.X();
+	var py=Player.Y();
+	var end=Orion.Now()+600;
+	while(X!=Player.X() || Y!=Player.Y())
+	{
+		//Orion.Print(Player.X()+": "+X);
+		//Orion.Print(Player.Y()+": "+Y);
+		if(Orion.Now()>end) return false;
+
+		if(X<Player.X() && Y>Player.Y())
+		{
+			Orion.Step(5,true);// vlevo
+		}
+		if(X>Player.X() && Y<Player.Y())
+		{
+			Orion.Step(1,true); //vpravo
+		}
+		if(X<Player.X() && Y<Player.Y())
+		{
+			Orion.Step(7,true); //nahoru
+		}
+		if(X>Player.X() && Y>Player.Y())
+		{
+			Orion.Step(3,true);// dolu
+		}
+		if(X<Player.X() && Y==Player.Y())
+		{
+			Orion.Step(6,true);//vlevo-nahoru
+		}
+		if(X>Player.X() && Y==Player.Y())
+		{
+			Orion.Step(2,true); //vpravo-dolu
+			
+		}
+		if(X==Player.X() && Y>Player.Y())
+		{
+			Orion.Step(4,true); //vlevo_dolu
+		}
+		if(X==Player.X() && Y<Player.Y())
+		{
+			Orion.Step(0,true); //vpravo-nahoru
+		}
+		Orion.Wait(100);
+	}
+	return true;
+}
+
+
+function mine(__private)
+{
+	EnemyCheck();
+	//var pickaxe=Orion.FindObject(Orion.FindType('0x0E85|0x0E86', '0xFFFF', 'backpack', ['flags'], ['distance'], ['notoriety'], true));
+	while(!Orion.InJournal('There is no ore |too far|Try mining|Tam nedosahnes.|Jsi prilis daleko.', 'my|sys'))
+	//'(!Orion.InJournal('You put |Nevykopala jsi nic', 'my|sys', ['serial'], ['color'], 0,0))
+	{
+	//Orion.UseType('0x0E85|0x0E86', '0xFFFF', 'backpack',true);
+		Orion.WaitTargetTileRelative('mine', Player.X,Player.Y, Player.Z);
+		Orion.UseType('0x0E85|0x0E86');
+		var end= Orion.Now()+3500;
+		Orion.SetGlobal("nextMine",end);
+		while( Orion.Now()< end)
+		{
+			AfkCheck();
+			EnemyCheck();
+			if(Orion.InJournal('Jeste nemuzes pouzit skill', 'my|sys'))
+			{
+				Orion.ClearJournal('Jeste nemuzes pouzit skill');
+				Orion.Wait(5500);
+			}
+			if(Orion.InJournal('There is no ore |too far|Try mining|Tam nedosahnes.|Jsi prilis daleko.', 'my|sys'))break;
+			if(Orion.InJournal('mramor|citri|tourm|emeral|rub|ameth|diam|sapph|You put the Copper|You put the Iron|You put the Kremicity |You put the Verite ', 'my|sys'))
+			{
+				Orion.ClearJournal('mramor|citri|tourm|emeral|rub|ameth|diam|sapph|You put the Copper |You put the Iron|You put the Kremicity |You put the Verite ');
+				var coprOre=Orion.FindType('0x19B7', '0x099A','backpack');
+				if(coprOre!='')
+				{
+					Orion.DropHere(coprOre);
+				}
+				//Orion.Wait(end-Orion.Now());
+				//Orion.SetGlobal("nextMine",end);
+				return;
+			}
+
+			if(Player.Stam()<limitStam)
+				Potion("refresh");
+			Orion.Wait(200);
+		}
+	}
+	Orion.ClearJournal('There is no ore|too far|Try mining|Tam nedosahnes.|Jsi prilis daleko.');
+}
+
+
+function Bank(__private)
+{
+	Orion.Say(bankEq);
+	Orion.Wait(700);
+	var gum=Orion.GetLastGump();
+	Orion.Wait(200);
+	gum.Select(Orion.CreateGumpHook(9));// pri spoluvlastnikovi
+	Orion.Wait(500);
+
+}
+
+
+function OpenDoor()
+{
+	var portaFechada= Orion.FindType('0x3EB2|0x3EB1|0x0675|0x0677|0x0679|0x067B|0x067D|0x067F|0x0681|0x0683|0x0685|0x0687|0x0689|0x068B|0x068D|0x068F|0x0691|0x0693|0x0695|0x0697|0x0699|0x069B|0x069D|0x069F|0x06A1|0x06A3|0x06A5|0x06A7|0x06A9|0x06AB|0x06AD|0x06AF|0x06B1|0x06B3|0x06B5|0x06B7|0x06B9|0x06BB|0x06BD|0x06BF|0x06C1|0x06C3|0x06C5|0x06C7|0x06C9|0x06CB|0x06CD|0x06CF|0x06D1|0x06D3|0x06D5|0x06D7|0x06D9|0x06DB|0x06DD|0x06DF|0x06E1|0x06E3|0x06E5|0x06E7|0x06E9|0x06EB|0x06ED|0x06EF|0x06F1|0x06F3|0x06F5|0x0824|0x0826|0x0828|0x082A|0x082C|0x082E|0x0830|0x0832|0x0839|0x083B|0x083D|0x083F|0x0841|0x0843|0x0845|0x0847|0x084C|0x084E|0x0850|0x0852|0x0854|0x0856|0x0858|0x085A|0x0866|0x0868|0x086A|0x086C|0x086E|0x0870|0x0872|0x0874|0x1FED|0x1FEF|0x1FF1|0x1FF3|0x1FF5|0x1FF7|0x1FF9|0x1FFB|0x00E8|0x00EA|0x00EC|0x00EE|0x00F0|0x00F2|0x00F4|0x00F6|0x0314|0x0316|0x0318|0x031A|0x031C|0x031E|0x0320|0x0322|0x0324|0x0326|0x0328|0x032A|0x032C|0x032E|0x0330|0x0332|0x0334|0x0336|0x0338|0x033A|0x033C|0x033E|0x0340|0x0342|0x0344|0x0346|0x0348|0x034A|0x034C|0x034E|0x0350|0x0352|0x0354|0x0356|0x0358|0x035A|0x035C|0x035E|0x0360|0x0362','-1',ground,'',2);
+	var portaAberta =Orion.FindType('0x3ED5|0x3ED4|0x0676|0x0678|0x067A|0x067C|0x067E|0x0680|0x0682|0x0684|0x0686|0x0688|0x068A|0x068C|0x068E|0x0690|0x0692|0x0694|0x0696|0x0698|0x069A|0x069C|0x069E|0x06A0|0x06A2|0x06A4|0x06A6|0x06A8|0x06AA|0x06AC|0x06AE|0x06B0|0x06B2|0x06B4|0x06B6|0x06B8|0x06BA|0x06BC|0x06BE|0x06C0|0x06C2|0x06C4|0x06C6|0x06C8|0x06CA|0x06CC|0x06CE|0x06D0|0x06D2|0x06D4|0x06D6|0x06D8|0x06DA|0x06DC|0x06DE|0x06E0|0x06E2|0x06E4|0x06E6|0x06E8|0x06EA|0x06EC|0x06EE|0x06F0|0x06F2|0x06F4|0x06F6|0x0825|0x0827|0x0829|0x082A|0x082C|0x082E|0x0831|0x0833|0x083A|0x083C|0x083E|0x0840|0x0842|0x0844|0x0846|0x0848|0x084D|0x084F|0x0851|0x0853|0x0855|0x0857|0x0859|0x085B|0x0867|0x0869|0x086B|0x086D|0x086F|0x0871|0x0873|0x0875|0x1FEE|0x1FF0|0x1FF2|0x1FF4|0x1FF6|0x1FF8|0x1FFA|0x1FFC|0x00E9|0x00EB|0x00ED|0x00EF|0x00F1|0x00F3|0x00F5|0x00F7|0x0315|0x0317|0x0319|0x031B|0x031D|0x031F|0x0321|0x0323|0x0325|0x0327|0x0329|0x032B|0x032D|0x032F|0x0331|0x0333|0x0335|0x0337|0x0339|0x033B|0x033D|0x033F|0x0341|0x0343|0x0345|0x0347|0x0349|0x034B|0x034D|0x034F|0x0351|0x0353|0x0355|0x0357|0x0359|0x035B|0x035D|0x035F|0x0361|0x0363','-1',ground,'',3);
+	var shipDoorOpen =Orion.FindType('0x3EB2|0x3EB1|0x3E8A|0x3E85','-1',ground,'',18);
+	var shipDoorClosed =Orion.FindType('0x3E89|0x3E84','-1',ground,'',18);
+
+	if (portaAberta.length > 0)
+	{
+		var porta = portaFechada;//portaAberta;
+	}
+	else
+	{
+		var porta = portaFechada;
+	}
+	if(porta.length)
+	{
+		var quantity = porta.length;
+		Orion.Print(quantity);
+		for (i = 0; i < quantity; i++)
+		{
+			Orion.UseObject(porta[i]);
+			Orion.Wait(30);
+		}
+    }
+	
+	if (shipDoorClosed.length > 0)
+	{
+		var porta = portaAberta;
+	}
+	else
+	{
+		var porta = shipDoorOpen;
+	}
+	if(porta.length)
+	{
+		var quantity = porta.length;
+		Orion.Print(quantity);
+		for (i = 0; i < quantity; i++)
+		{
+			Orion.UseObject(porta[i]);
+			Orion.Wait(30);
+		}
+    }
+}
+
+function AttackNearestMonster()
+{ 
+    //Add your pets to your friendlist.they might get attacked by you unless they are in your friendlist.
+    //Ignoring self and friendlisted entities
+    Orion.Ignore('self');
+
+    //Finds Monster in 15 tiles starting from closest 
+    var creatures = Orion.FindType('!0x0190|!0x0191','0xFFFF', ground, 'near|mobile|ignorefriends', '15', 'gray|red|criminal|blue|enemy'); 
+    if (!creatures.length)
+    {
+        Orion.Print( '-1', 'no creature found, resetting ignore list');
+        Orion.IgnoreReset();
+        return '';
+    }
+    Orion.RemoveObject("target");
+    Orion.AddObject("target",creatures[0]);
+    var target = Orion.FindObject("target");
+
+    //Runs to the target
+    Orion.WalkTo(target.X(),target.Y(),0);
+    Orion.WaitTargetObject("target");
+
+    //Invokes honor virtue on target
+   // Orion.InvokeVirture('Honor');
+
+    //Attacks the target
+    Orion.Attack("target");
+
+    //Keep following the target until it dies
+    while(target.Exists()){
+        Orion.WalkTo(target.X(),target.Y(),0);
+        Orion.Wait(1000);
+        Orion.Attack("target");
+        }
+    Orion.Wait(500);
+
+    //Loots the corpse using the loot function that can be found on Orion forums written by Hotride.
+    //You may use any working loot fuction by changing the lines below.
+   // FastLootRPG();
+}
+
+
+function OnHitBandage()
+{
+	while(true)
+	{
+		var tmp=Orion.WaitJournal('Tvuj cil krvaci.|Skvely zasah!|Kriticky zasah!|Vysavas staminu|Vysavas zivoty!',Orion.Now(),0);
+		Orion.ClearJournal('Tvuj cil krvaci.|Skvely zasah!|Kriticky zasah!|Vysavas staminu|Vysavas zivoty!');
+		if(Player.Hits!=Player.MaxHits)
+		{
+			var lh=Orion.ObjAtLayer('LeftHand');
+			if(lh.Graphic()=='0x1405' || lh.Graphic()=='0x1404') continue;
+			Bandage();
+		}
+		Orion.Wait(200);
+	}
+}
+
+function HPCheck()
+{
+	var criticalHits=45;
+	var lastHP=Player.Hits();
+	var change=0;
+	while(true)	
+	{
+		if(Player.Dead())continue;
+		if(lastHP!=Player.Hits())
+		{
+			if(lastHP<Player.Hits() & (Player.Hits()-lastHP)>4 )
+			{
+				change=Player.Hits()-lastHP;
+				 if(change<4)continue;
+				//CharPrintDelayed('self', '0x0044', "["+Player.Hits()+"/"+Player.MaxHits()+"]   +"+change);// +HP
+				CharPrintDelayed('self', '0x0044', "+"+(change/(Player.MaxHits()/100)).toFixed(1));// +HP
+			}
+			else
+			{
+				change=lastHP-Player.Hits();
+				if(change<4)continue;
+				//CharPrintDelayed('self', '0x098E', "["+Player.Hits()+"/"+Player.MaxHits()+"]   -"+change);// -HP
+				CharPrintDelayed('self', '0x0087', "-"+(change/(Player.MaxHits()/100)).toFixed(1));// +HP
+			}
+			lastHP=Player.Hits();
+			
+			
+		}
+		if( !Player.Dead() && Player.Hits()<criticalHits && Player.Hits()>0)
+		{
+			Orion.Say(".potionheal");
+			Orion.Wait(1000);
+		}
+		Orion.Wait(100);
+	}
+}
+
+function Bandage()
+{
+	if(Orion.Now()>Orion.GetGlobal("bandageStart"))
+	{
+		Orion.SetGlobal("bandageDone",true);
+	}
+	if(Orion.GetGlobal("bandageDone")=='false')return;
+	if(Player.Hits()==Player.MaxHits())
+	{
+		if(Player.MaxMana()>100)
+		{
+			if(!Orion.ObjAtLayer('LeftHand'))
+			{
+				Orion.Arm(Orion.GetGlobal("weap"));
+			}
+		}
+		else{
+			Orion.Wait(200);
+			Orion.Arm(Orion.GetGlobal("weap"));
+		}
+		return;
+	}
+	Orion.SetGlobal("bandageDone",'false');
+	Orion.SetGlobal("bandageStart",Orion.Now()+7000);
+	
+	Orion.CancelTarget();
+	Orion.CancelWaitTarget();
+		Orion.UseType(0x0E21); //ciste bandy
+		Orion.WaitTargetObject(self);
+	Orion.Print('Bandim');
+	var weapon= Orion.FindType(weaponGraphic, '0xFFFF', 'backpack');
+	Orion.Equip(weapon[0]);
+}
+
+
+function CharPrintDelayed(serial, color, text)
+{
+	var oldUse = Orion.OptionScaleSpeech();
+	var oldDelay = Orion.OptionScaleSpeechDelay();
+ 
+	Orion.OptionScaleSpeech(true);
+	Orion.OptionScaleSpeechDelay(15);
+ 
+	Orion.CharPrint(serial, color, text);
+	Orion.Wait(100);
+ 
+	Orion.OptionScaleSpeech(oldUse);
+	Orion.OptionScaleSpeechDelay(55);
+}

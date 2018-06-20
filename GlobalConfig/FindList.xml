@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data version="0" size="10">
+    <findlist name="LotItemMaps">
+        <item graphic="0x14EB" color="0x0000" comment="Tajemna mapa"/>
+        <item graphic="0x0E76" color="0xFFFF" comment="Vacek"/>
+        <item graphic="0x19B7" color="0x0026" comment="Adamantium Ore"/>
+        <item graphic="0x19B7" color="0x09BD" comment="Obsidian Ore"/>
+        <item graphic="0x09B0" color="0x0430" comment="Vacek s magickym predmetem"/>
+    </findlist>
+    <findlist name="LotRegs">
+        <item graphic="0x0F8B" color="0x0000" comment="Pumice"/>
+        <item graphic="0x0F8D" color="0x0000" comment="Spider's Silk"/>
+        <item graphic="0x0F91" color="0x0000" comment="Wyrm's Hearts"/>
+        <item graphic="0x0F8A" color="0x0000" comment="Pig Iron"/>
+        <item graphic="0x0F84" color="0x0000" comment="Garlic"/>
+        <item graphic="0x0F87" color="0x0000" comment="Eyes of Newt"/>
+        <item graphic="0x0F86" color="0x0000" comment="Mandrake Roots"/>
+        <item graphic="0x0F7E" color="0x0000" comment="Bones"/>
+        <item graphic="0x0F83" color="0x0000" comment="Executioner's Cap"/>
+        <item graphic="0x0F82" color="0x0000" comment="Dragon's Blood"/>
+        <item graphic="0x0F89" color="0x0000" comment="Obsidian"/>
+        <item graphic="0x0F7D" color="0x0000" comment="Daemon Blood"/>
+        <item graphic="0x0F8C" color="0x0000" comment="Sulfurous Ash"/>
+        <item graphic="0x0F90" color="0x0000" comment="Dead Wood"/>
+        <item graphic="0x0F80" color="0x0000" comment="Daemon Bones"/>
+        <item graphic="0x0F8F" color="0x0000" comment="Grave Dust"/>
+        <item graphic="0x0F89" color="0x0000" comment="Obsidian"/>
+        <item graphic="0x0F8E" color="0x0000" comment="Nox Crystal"/>
+        <item graphic="0x0F85" color="0x0000" comment="Ginseng"/>
+        <item graphic="0x0F7B" color="0x0000" comment="Blood Moss"/>
+        <item graphic="0x0F78" color="0x0000" comment="Batwings"/>
+        <item graphic="0x0F8B" color="0x0000" comment="Pumice"/>
+        <item graphic="0x0F7A" color="0x0000" comment="Black Pearls"/>
+        <item graphic="0x0F88" color="0x0000" comment="Nightshade"/>
+        <item graphic="0x0F81" color="0x0000" comment="Fertile Dirt"/>
+        <item graphic="0x0F88" color="0x0000" comment="Nightshade"/>
+    </findlist>
+    <findlist name="LotGems">
+        <item graphic="0x0F13" color="0x0000" comment="ruby"/>
+        <item graphic="0x0F0F" color="0x0000" comment="star sapphire"/>
+        <item graphic="0x0F18" color="0x0000" comment="tourmaline"/>
+        <item graphic="0x0F10" color="0x0000" comment="emeralds"/>
+        <item graphic="0x0F2F" color="0x098E" comment="Kamen Ohne"/>
+        <item graphic="0x0F25" color="0x0000" comment="piece of amber"/>
+        <item graphic="0x0F16" color="0x0000" comment="amethyst"/>
+        <item graphic="0x0F11" color="0x0000" comment="sapphire"/>
+        <item graphic="0x0F15" color="0x0000" comment="citrine"/>
+        <item graphic="0x0F26" color="0x0000" comment="diamond"/>
+        <item graphic="0x1363" color="0xFFFF" comment="Mramor"/>
+    </findlist>
+    <findlist name="LotFeather">
+        <item graphic="0x1BD1" color="0x0000" comment="feather"/>
+    </findlist>
+    <findlist name="LotLeather">
+        <item graphic="0x1078" color="0x0000" comment="piles of hides"/>
+    </findlist>
+    <findlist name="LotCustom">
+        <item graphic="0x186F" color="0xFFFF" comment="Vanocni banka"/>
+        <item graphic="0x1726" color="0x0992" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x084D" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x0AC1" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x0985" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x099D" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x0983" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x0980" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x007C" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x0006" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x0429" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x0021" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x098E" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x0111" comment="Velikonocni vejce"/>
+        <item graphic="0x1726" color="0x042D" comment="Velikonocni vejce"/>
+        <item graphic="0x1BFB" color="0xFFFF" comment="oak piercing bolts"/>
+    </findlist>
+    <findlist name="LotGold">
+        <item graphic="0x0EED" color="0x0000" comment="Gold"/>
+    </findlist>
+    <findlist name="LotFood"/>
+    <findlist name="PVPLoot">
+        <item graphic="0x13F9" color="0xFFFF" comment="Stoics Gnarled staff of Mage "/>
+        <item graphic="0x13F8" color="0xFFFF" comment="Gnarled staff of Mage and of "/>
+        <item graphic="0x1401" color="0xFFFF" comment="valorite kryss"/>
+        <item graphic="0x1440" color="0xFFFF" comment="Cutlass of Fencer vyroben od "/>
+        <item graphic="0x0F4F" color="0xFFFF" comment="Crossbow of Archer vyroben od"/>
+        <item graphic="0x1438" color="0xFFFF" comment="valorite war hammer"/>
+        <item graphic="0x143F" color="0xFFFF" comment="valorite halberd"/>
+        <item graphic="0x0F4C" color="0xFFFF" comment="obsidian double axe"/>
+        <item graphic="0x1415" color="0xFFFF" comment="Valorite Platemail"/>
+        <item graphic="0x1416" color="0xFFFF" comment="Valorite Platemail"/>
+        <item graphic="0x1411" color="0xFFFF" comment="Valorite Platemail Legs"/>
+        <item graphic="0x1417" color="0xFFFF" comment="Valorite Platemail Arms"/>
+        <item graphic="0x1419" color="0xFFFF" comment="Valorite Plate Helm"/>
+        <item graphic="0x1414" color="0xFFFF" comment="Valorite Platemail Gauntlets"/>
+        <item graphic="0x1413" color="0xFFFF" comment="Valorite Platemail Gorget"/>
+        <item graphic="0x140F" color="0xFFFF" comment="Valorite Nose Helm"/>
+        <item graphic="0x1419" color="0xFFFF" comment="Valorite Plate Helm"/>
+        <item graphic="0x1409" color="0xFFFF" comment="Valorite Closed Helm"/>
+        <item graphic="0x1412" color="0xFFFF" comment="Valorite Plate Helm"/>
+        <item graphic="0x140E" color="0xFFFF" comment="Valorite Nose Helm"/>
+        <item graphic="0x1418" color="0xFFFF" comment="Valorite Platemail Gauntlets"/>
+        <item graphic="0x1413" color="0xFFFF" comment="Valorite Platemail Gorget"/>
+        <item graphic="0x1410" color="0xFFFF" comment="Valorite Platemail Arms"/>
+        <item graphic="0x13DB" color="0xFFFF" comment="Valorite Studded Tunic"/>
+        <item graphic="0x13E2" color="0xFFFF" comment="Valorite Studded Tunic"/>
+        <item graphic="0x13DA" color="0xFFFF" comment="Valorite Studded Leggings"/>
+        <item graphic="0x13E1" color="0xFFFF" comment="Valorite Studded Leggings"/>
+        <item graphic="0x13D5" color="0xFFFF" comment="Valorite Studded Gloves"/>
+        <item graphic="0x13DD" color="0xFFFF" comment="Valorite Studded Gloves"/>
+        <item graphic="0x13D4" color="0xFFFF" comment="Valorite Studded Sleeves"/>
+        <item graphic="0x13D6" color="0xFFFF" comment="Valorite Studded Gorget"/>
+        <item graphic="0x13DC" color="0xFFFF" comment="Valorite Studded Sleeves"/>
+        <item graphic="0x1454" color="0xFFFF" comment="Bone Chest of Valorite"/>
+        <item graphic="0x144F" color="0xFFFF" comment="Bone Chest of Valorite"/>
+        <item graphic="0x1452" color="0xFFFF" comment="Bone Legs of Valorite"/>
+        <item graphic="0x1457" color="0xFFFF" comment="Bone Legs of Valorite"/>
+        <item graphic="0x1455" color="0xFFFF" comment="Bone Gloves of Valorite"/>
+        <item graphic="0x1453" color="0xFFFF" comment="Bone Arms of Valorite"/>
+        <item graphic="0x1450" color="0xFFFF" comment="Bone Gloves of Valorite"/>
+        <item graphic="0x144E" color="0xFFFF" comment="Bone Arms of Valorite"/>
+        <item graphic="0x13ED" color="0xFFFF" comment="Valorite Ringmail Tunic"/>
+        <item graphic="0x13EC" color="0xFFFF" comment="Valorite Ringmail Tunic"/>
+        <item graphic="0x13F0" color="0xFFFF" comment="Valorite Ringmail Leggings"/>
+        <item graphic="0x13F1" color="0xFFFF" comment="Valorite Ringmail Leggings"/>
+        <item graphic="0x13EB" color="0xFFFF" comment="Valorite Ringmail Gloves"/>
+        <item graphic="0x13F2" color="0xFFFF" comment="Valorite Ringmail Gloves"/>
+        <item graphic="0x140B" color="0xFFFF" comment="Valorite Ringmail Helm"/>
+        <item graphic="0x140A" color="0xFFFF" comment="Valorite Ringmail Helm"/>
+        <item graphic="0x13C7" color="0xFFFF" comment="Valorite ringmail gorget"/>
+        <item graphic="0x1451" color="0xFFFF" comment="Bone Helmet of Obsidian"/>
+        <item graphic="0x1456" color="0xFFFF" comment="Bone Helmet of Obsidian"/>
+        <item graphic="0x1B7B" color="0xFFFF" comment="Ranged Blocking and Physical "/>
+        <item graphic="0x1087" color="0xFFFF" comment="Earrings of Rogue and of Rela"/>
+        <item graphic="0x1F06" color="0xFFFF" comment="Demonslaying and Knights Brac"/>
+        <item graphic="0x0EFA" color="0xFFFF" comment="spellbook"/>
+        <item graphic="0x0E75" color="0xFFFF" comment="backpack"/>
+        <item graphic="0x09AA" color="0xFFFF" comment="Armor,ADA"/>
+        <item graphic="0x0E7D" color="0xFFFF" comment="Lot_Kose"/>
+        <item graphic="0x09B0" color="0xFFFF" comment="Nastroje"/>
+        <item graphic="0x0E79" color="0xFFFF" comment="Nastroje"/>
+        <item graphic="0x0E76" color="0xFFFF" comment="ceri"/>
+    </findlist>
+</data>

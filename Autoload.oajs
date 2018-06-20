@@ -1,0 +1,3035 @@
+//KONSTANTY
+
+var criticalHits=45; //HP pod ktere se pije GH
+var autoDrinkHeal = true; // povoleni autopiti GH
+
+var statusX=1400;  //X souradnice statusbaru targetu
+var statusY=50;		//Y souradnice statusbaru targetu
+
+// Nastaveni spellu pro autosipku
+	var AutoUnParalyzeSpell ='Harm';
+	//var AutoUnParalyzeSpell = 'Magic Arrow';
+
+//autoheal
+var Shaman=false;
+
+
+var GPAmount=6000; // mnozstvi GP  kdy provede prikaz .mesec
+
+
+
+//--------------------------------------//
+var spells=
+	[
+		["Harm",1200],
+		["Magic Arrow",2200],
+		["Fireball",1850],
+		["Lightning",3100],
+		["Energy Bolt",2900],
+		["frostbolt",2750],
+		["necrobolt",2700],
+		["Mind Blast",3200],
+		["Paralyze",5000],
+		["Flame Strike",3700],
+		["Meteor Swarm",6500],
+		["Energy Field",7200],
+		["Magic Reflection",4500],
+		["Night Sight",2000],
+		["Protection",2000],
+		["Bless",3500],
+		["Dispel Field",3100],
+		["Reactive Armor",3100],
+		["Cure",1900],
+
+	];
+	
+// name, color, delay, duration
+var pots=
+	[
+		["heal",0x0160,21000,0],
+		["cure",0x008E,21000,400000],
+		["cure",0x002B,21000,200000],
+		["invis",0x0447,21000,200000],
+		["refresh",0x00ED,21000,0],
+		["refresh",0x0027,16000,0],
+		["reflex",0x0985,21000,500000],
+		["mobility",0x000F,6000,30000],
+		["nightsight",0x0980,6000,0],
+		["agility",0x00CF,6000,600000],
+		["agility",0x0005,6000,300000],
+		["strength",0x076B,6000,600000],
+		["strength",0x0388,6000,300000],
+		["clever",0x047D,6000,600000],
+		["clever",0x073E,6000,300000],
+		["stoneskin",0x0999,6000,600000],
+		["reactive",0x0A82,21000,10000]
+		
+	];
+
+var any= '0xFFFF';
+
+var allContainers='0x0E76|0x0E75|0x09B0|0x0E79|0x09AB|0x0E7C|0x0E7D|0x09AA|0x0E7E|0x09A9|0x0E83|0x0E42|0x0E43|0x09A8|0x0E80';
+var containerTypes=
+[
+	{Graphic:0x0E76,MinX:30,MinY:35,MaxX:95,MaxY:100},//
+	{Graphic:0x0E75,MinX:44,MinY:65,MaxX:142,MaxY:132},//
+	{Graphic:0x09B0,MinX:44,MinY:65,MaxX:142,MaxY:132},//
+	{Graphic:0x0E79,MinX:44,MinY:65,MaxX:142,MaxY:132},//
+	{Graphic:0x09AB,MinX:30,MinY:35,MaxX:95,MaxY:100},
+	{Graphic:0x0E7C,MinX:30,MinY:35,MaxX:95,MaxY:100},
+	{Graphic:0x0E7D,MinX:30,MinY:35,MaxX:95,MaxY:100},
+	{Graphic:0x09AA,MinX:30,MinY:35,MaxX:95,MaxY:100},
+	{Graphic:0x0E7E,MinX:30,MinY:35,MaxX:95,MaxY:100},
+	{Graphic:0x09A9,MinX:30,MinY:35,MaxX:95,MaxY:100},
+	{Graphic:0x0E83,MinX:30,MinY:35,MaxX:95,MaxY:100},
+	{Graphic:0x0E42,MinX:30,MinY:35,MaxX:95,MaxY:100},
+	{Graphic:0x0E43,MinX:30,MinY:35,MaxX:95,MaxY:100},
+	{Graphic:0x09A8,MinX:30,MinY:35,MaxX:95,MaxY:100},
+	{Graphic:0x0E80,MinX:30,MinY:35,MaxX:95,MaxY:100}
+]
+	
+function TakeAll()
+{
+  	Orion.AddObject("trg");
+	while(Orion.HaveTarget()) Orion.Wait(100);
+	var target =  Orion.FindObject('trg');
+	var items=Orion.FindType('-1', '-1', target.Serial());
+	
+	for (var i = 0; i < items.length; i++)
+	{
+		Orion.MoveItem(items[i], 0, 'lotBag');
+		Orion.Wait(100);
+	}
+	
+	Orion.RemoveObject('trg');
+}
+	
+	
+function VysypPokladnicky(){
+  	Orion.AddObject("trg");
+	while(Orion.HaveTarget()) Orion.Wait(100);
+	var target =  Orion.FindObject('trg');
+	Orion.RemoveObject('trg');
+	var gpPack=Orion.FindType('0x0E76|0x0E80|0x09A8', '0x0995', backpack);
+	while(gpPack){
+		Orion.Wait(200);
+		Orion.UseObject(gpPack[0]);
+		Orion.Wait(200);
+		var gum=Orion.GetLastGump();
+		Orion.Wait(200);
+		var hook=Orion.CreateGumpHook(2);
+		gum.Select(hook);
+		Orion.Wait(100);
+		var gp=Orion.FindType(0x0EED, 0x0000, backpack);
+		for(var i=0;i<gp.length;i++){
+			Orion.MoveItem(gp[i],0,target.Serial());
+		}
+		gpPack=Orion.FindType('0x0E76|0x0E80|0x09A8', '0x0995', backpack);
+	}
+}
+
+
+function Autostart()
+{
+	Orion.Terminate('all', ['Autostart']);
+	Orion.SetGlobal('LeapTime',Orion.Now()+3000);
+	Orion.SetGlobal('autoCast',false);
+	SwitchArm(1);
+	//Orion.Exec("AutoLoot");
+	Orion.Exec("HPCheck");
+	Orion.Exec("potionWatch");
+	Orion.Exec("AutoMesec");
+	Orion.Exec("Naprahy");
+	Orion.Exec("OnHitBandage");
+	Orion.Exec("JournalCheck");
+	//Orion.Exec("LotSet");
+	
+	Orion.Exec("AutoArrow");
+	Orion.Exec("AutoLoot_Ground_ItemMapGoldRegsGems");
+	Orion.Exec("AutoLoot_Custom");
+	Orion.Exec("AutoLoot_LeatherFeather");
+	Orion.Exec("AutoLoot_Gems");
+	Orion.Exec("AutoLoot_Regs");
+	Orion.Exec("AutoLoot_Gold");
+	Orion.Exec("AutoLoot_ItemMap");
+
+	Orion.OptionScaleSpeechDelay(60);
+
+	Orion.Print(Player.Name());
+
+}
+	
+function AutoArrow(){
+	
+	while(true){
+		Orion.Wait(100);
+		if(Player.Dead() || Player.Hidden()) continue;
+		
+		var msg=Orion.WaitJournal('nohama ti projela silna bolest|citis, ze se nemuzes hybat.|crying awfully.|Unknown Cliloc #500111', Orion.Now(), Orion.Now()+10000);
+		if(msg){
+			Orion.SetGlobal('castSpell',true);
+			Orion.WarMode(false);
+			Orion.Wait(100);
+			Orion.Cast(AutoUnParalyzeSpell,self);
+			for(i=0;i<spells.length;i++)
+			{
+				if(spells[i][0]==AutoUnParalyzeSpell)
+				{
+					Wait4Cast(spells[i][1]);
+				Orion.SetGlobal('castSpell',false);
+				break;
+				}
+			}
+			Orion.Wait(500);
+			Orion.Attack(lasttarget);
+		}
+	}
+}
+	
+
+function Cure(){
+	if(Player.Poisoned()){
+		BandCast('Cure',self);
+	}
+	var list=Orion.GetFriendList();
+	for (var i = 0; i < list.length; i++)
+	{
+		var targ = Orion.FindObject(list[i]);
+		if(!targ)continue;
+		if(targ.Poisoned()){
+			BandCast('Cure',targ.Serial());
+		}
+	}
+}
+function OpenAllContainers(serial){
+	Orion.OpenContainer(serial,500);
+	var fnd= Orion.FindType(allContainers,'0xFFFF',serial);
+	if(!fnd.length)return;
+	for(var i=0;i<fnd.length;i++){
+		OpenAllContainers(fnd[i]);
+		Orion.Wait(100);
+	}
+}
+function MoveAllPots(){
+	Orion.Print("Zamer kde hledat");
+	Orion.AddObject("one");
+	var target=Orion.FindObject("one");
+	while(Orion.HaveTarget())Orion.Wait(100);
+	if(target==null){
+		Orion.Print("Zamer kde hledat");
+		target=Orion.FindObject("one");
+		while(Orion.HaveTarget())Orion.Wait(100);
+	}
+	Orion.Print("Zamer kam davat");
+	Orion.AddObject("vysyp");
+	var vys=Orion.FindObject("vysyp");
+	while(Orion.HaveTarget())Orion.Wait(100);
+	if(vys==null){
+		Orion.Print("Zamer kam davat");
+		vys=Orion.FindObject("vysyp");
+		while(Orion.HaveTarget())Orion.Wait(100);
+	}
+	OpenAllContainers(target.Serial());
+	Orion.Wait(200);
+	var fnd= Orion.FindType('0x0F0E','0xFFFF',target.Serial());
+	for(var i=0;i<fnd.length;i++){
+		
+		Orion.MoveItem(fnd[i], 0, vys.Serial());
+		Orion.Wait(100);
+	}
+	Orion.RemoveObject("one");
+	Orion.RemoveObject("vysyp");
+}
+
+
+
+function Summon(Name)
+{
+	Orion.Cast("Summ. Creature");
+	Orion.Wait(200);
+	Orion.SelectMenu('What do you want to summon ?', Name);
+}
+
+
+function SummonHere(Name)
+{
+	Orion.Cast("Summ. Creature");
+	Orion.Wait(200);
+	Orion.WaitTargetObject(self);
+	Orion.SelectMenu('What do you want to summon ?', Name);
+}
+
+
+
+
+function BandCast(spellName,target)
+{
+	if(Player.Hits!=Player.MaxHits)
+	{
+		Bandage();
+	}
+
+	Orion.SetGlobal('castSpell',true);
+	if(target)
+	{
+		if(spellName=="frostbolt")
+		{
+			Orion.WaitTargetObject(target);
+			Orion.Say(".frostbolt");
+		}
+		else
+		{
+			if(spellName=="necrobolt")
+			{
+				Orion.WaitTargetObject(target);
+				Orion.Say(".necrobolt");
+			}
+			else
+			{
+				Orion.Cast(spellName,target);
+			}
+		}
+	}
+	else
+	{		
+		if(spellName=="frostbolt")
+		{
+			Orion.WaitTargetObject(target.Serial());
+			Orion.Say(".frostbolt");
+		}
+		else
+		{
+			if(spellName=="necrobolt")
+			{
+				Orion.WaitTargetObject(target.Serial());
+				Orion.Say(".necrobolt");
+			}
+			else
+			{
+				Orion.Cast(spellName);
+			}
+		}
+	}
+	
+	Orion.SetGlobal('lastSpell',spellName);
+
+	for(var i=0;i<spells.length;i++)
+	{
+		if(spells[i][0]==spellName)
+		{
+			Orion.SetGlobal('lastSpellDelay',spells[i][0]);
+			while(Orion.HaveTarget()){
+				Orion.Wait(100);
+			}
+			var res=Wait4Cast(spells[i][1]);
+			Orion.SetGlobal('castSpell',false);
+			return res;
+		}
+	}
+}
+
+
+
+function AutoCast()
+{
+	Orion.ClearJournal();
+	if(Orion.GetGlobal('autoCast')=='true')
+	{
+		Orion.SetGlobal('autoCast',false);
+		Orion.CharPrint('self',33,'AutoCast Off');
+		return;
+	}
+	else
+	{
+		Orion.SetGlobal('autoCast',true);
+		Orion.CharPrint('self',53,'AutoCast On');
+	}
+	while(Orion.GetGlobal('autoCast')=='true')
+	{
+		Orion.Wait(100);
+		if(Player.Hidden())
+		{
+			Orion.SetGlobal('autoCast',false);
+			Orion.CharPrint('self',33,'AutoCast Off');
+			Orion.Terminate('AutoCast');
+			return;
+		}
+		if(Orion.FindObject(lasttarget)== null)
+		{
+			Orion.SetGlobal('autoCast',false);
+			Orion.CharPrint('self',33,'AutoCast Off');
+			Orion.Terminate('AutoCast');
+			return;
+		}
+		BandCast(Orion.GetGlobal('lastSpell'),lasttarget);
+	}
+}
+
+function MageAutoSilent()
+{
+	var charge=0;
+	var chargeTime=Orion.Now();
+	Orion.ClearJournal();
+	if(Orion.GetGlobal('autoCast')=='true')
+	{
+		Orion.SetGlobal('autoCast',false);
+		Orion.CharPrint('self',33,'AutoSilence Off');
+		return;
+	}
+	else
+	{
+		Orion.SetGlobal('autoCast',true);
+		Orion.CharPrint('self',53,'AutoSilence On');
+	}
+	while(Orion.GetGlobal('autoCast')=='true')
+	{
+		Orion.Wait(100);
+		if(Player.Hidden())
+		{
+			Orion.SetGlobal('autoCast',false);
+			Orion.CharPrint('self',33,'AutoSilence Off');
+			Orion.Terminate('MageAutoSilent');
+			return;
+		}
+		if(Orion.FindObject(lasttarget)== null)
+		{
+			Orion.SetGlobal('autoCast',false);
+			Orion.CharPrint('self',33,'AutoSilence Off');
+			Orion.Terminate('MageAutoSilent');
+			return;
+		}
+		if(charge<3 && chargeTime<Orion.Now())
+		{
+			var spell=BandCast('Harm',lasttarget);
+			if(spell){
+				charge+=1;
+				}
+			if(charge==3)
+			{
+				charge-=1;
+				chargeTime=Orion.Now()+15000;
+			}
+		}
+		else{
+			BandCast('Mind Blast',lasttarget);
+		}
+	}
+}
+
+function Wait4Cast(delay)
+{
+	var StartTime=Orion.Now();
+	var EndTime=StartTime+delay;
+	var lastNotif=Orion.Now();
+	while(Orion.Now()<EndTime)
+	{
+		var ms =Orion.InJournal('Nevidis na cil.|Kouzlo se nezdarilo.|in line of sight','my|sys',0,any,StartTime,EndTime);
+		if(ms)
+		{
+			Orion.ClearJournal(ms.Text());
+			//if(ms.Text()=='Kouzlo se nezdarilo.')
+			//	return false;
+			return false;//true;
+		}
+		if(Orion.Now()-lastNotif>300 && EndTime-Orion.Now()<1600 ){
+			lastNotif=Orion.Now();
+			var msg=((EndTime-Orion.Now())/1000).toString();
+			msg=msg.substring(0,3);
+			if(EndTime-Orion.Now()<500)
+			{
+				CharPrintDelayed(self, 0x0045,'Spell: '+msg ,6);
+			}
+			Orion.Print('0x0045','Spell: '+msg);
+		}
+	}
+	return true;
+}
+
+
+
+
+function JournalCheck()
+{
+	Orion.Wait(1500);
+	Orion.ClearJournal();
+	var expstart=GetActualExp();
+	var startTime=Orion.Now();
+	while(true)
+	{
+		Orion.Wait(100);
+		if(Orion.InJournal('#500876|uspesne osetren|Leceni se ti nepovedlo.| neni zranen.| krvacet.| Nevidis cil.| moc daleko.','my|sys')!=null)
+		{
+			Orion.ClearJournal('#500876|uspesne osetren|Leceni se ti nepovedlo.| neni zranen.| krvacet.| Nevidis cil.| moc daleko.');
+			Orion.SetGlobal("bandageDone",true);
+		}
+		if(Orion.InJournal(' vypadla zbran z ruky','my|sys')!=null)
+		{
+			Orion.ClearJournal(' vypadla zbran z ruky');
+			Orion.Exec('Bandage');
+		}
+		if(Orion.InJournal('exp?','my')!=null)
+		{
+			Orion.ClearJournal('exp?');
+			var xp=GetActualExp();
+			var xpp= (xp.Min - expstart.Min).toFixed(1);
+			var xp2do=(xp.Max-xp.Min);
+			var cas=((Orion.Now()-startTime)/60000).toFixed(2);
+			var prum=(xpp/cas).toFixed(2);
+			Orion.Print("Ziskano "+xpp+" zkusenosti.");
+			Orion.Print("Do dalsiho lvl zbyva: "+xp2do+" zkusenosti.");
+			//Orion.Print("Zabitých "+Orion.GetGlobal('killCnt').toString()+" monster.");
+
+			Orion.Print("Prumerne "+ prum + " expu za minutu.");
+			Orion.Print("Celkovy cas: "+cas+" minut.");
+		}
+		var txt=Orion.InJournal('Anna Tir Esgal');
+		if(txt!=null)
+		{
+			Orion.ClearJournal('Anna Tir Esgal');
+			var params=
+			[
+			txt.Serial(),1000,4,"Zed za ",15
+			]
+			Orion.Exec('CustomCountDown',false,params);
+		}
+		var txt=Orion.InJournal('Anna Tir Kemen');
+		if(txt!=null)
+		{
+			Orion.ClearJournal('Anna Tir Kemen');
+			var params=
+			[
+			txt.Serial(),1000,6,"Zed za ",15
+			]
+			Orion.Exec('CustomCountDown',false,params);
+		}
+		var txt=Orion.InJournal('Ruth Fuin Val','my');
+		if(txt!=null)
+		{
+			Orion.ClearJournal('Ruth Fuin Val');
+			var params=
+			[
+			txt.Serial(),800,3,"",19
+			]
+			Orion.Exec('CustomCountDown',false,params);
+		}
+		var txt=Orion.InJournal('gatah','sys');
+		if(txt!=null)
+		{
+			Orion.ClearJournal('gatah');
+			
+			var rune =Orion.FindType('0x1F14', '0x0005','backpack');
+			
+			Orion.Cast('Gate Travel', rune);
+		}
+	}
+}
+
+function GetActualExp(__private)
+{
+	Orion.Say(".explevel");
+	Orion.Wait(200);
+	var gum=Orion.GetLastGump();
+	var exp=gum.Text(2);
+	gum.Select(Orion.CreateGumpHook(0));
+	var expS=exp.split('/');
+	var rtn= {Min: expS[0], Max: expS[1]};
+	return rtn;
+}
+
+function CustomCountDown(serial,partDelay,parts,text,color)
+{
+	for(i=parts;i>0;i--)
+	{
+		Orion.Wait(partDelay);
+		CharPrintDelayed(serial,color,text+" "+i);
+	}
+}
+
+function AutoMesec()
+{
+	while(true)
+	{
+		Orion.Wait(5000);
+		if(Player.Dead())continue;
+		var gp=Orion.Count('0x0EED');
+		if(gp>GPAmount) // nad kolik GP dela mesce
+		Orion.Say(".mesec");
+		var gpBags=Orion.FindType('0x0E76', '0x0995', 'backpack');
+		if(gpBags.length>1){
+			for(var i=1;i<gpBags.length;i++){
+				Orion.MoveItem(gpBags[i], 1, gpBags[0]);
+			}
+		}
+	}
+}
+
+function printEcho(){
+	while(true){
+	var msg=Orion.WaitJournal('animationecho',Orion.Now(),0);
+	if(Orion.Contains(msg.Text(),'serial='+Player.Serial()) ){
+	Orion.Print(msg.Text());}
+	}
+}
+function Naprahy()
+{
+	while(true)
+	{	
+		Orion.Wait(100);
+		var msg=Orion.WaitJournal('animationecho',Orion.Now(),0);
+		
+	 	if(Orion.Contains(msg.Text(),'action=26|action=29') && Orion.Contains(msg.Text(),'serial='+Player.Serial()) )
+			CharPrintDelayed('self', '0xfa',"Naprah" );
+            Orion.Wait(200);
+	}
+}
+
+function Hid()
+{
+	Orion.ClearJournal();
+	
+	
+	if(Orion.SkillValue('Hiding', 'real')>750)
+	{
+	var HidDelay=1750; // prumer HidTest fce
+	}
+	else
+	{
+		var HidDelay=2100; // prumer HidTest fce
+	}
+	var first=true;
+	if(Player.WarMode)
+	{
+		Orion.WarMode(0);
+	}
+	Orion.OptionAlwaysRun(true);
+	
+	Orion.UseSkill("Hiding");
+	var start=Orion.Now();
+	var params=[	self,500,3,"",0x00FD	]	;
+	Orion.Exec('CustomCountDown',false,params);
+	
+	if(!HidWait(HidDelay-150))
+	{
+		Orion.OptionAlwaysRun(true);
+		CharPrintDelayed('self', '0x099B', 'Hidden Failed');
+		return;
+	}
+
+	Orion.OptionAlwaysRun(false);
+	var x=Orion.WaitJournal('Nepovedlo se ti schovat.|Skryti se povedlo.',Orion.Now()-(HidDelay),Orion.Now()+500);
+	if(!x)return;
+	if(x.Text()=='Nepovedlo se ti schovat.')
+	{
+		CharPrintDelayed('self', '0x099B', 'Hidden Failed');
+		Orion.OptionAlwaysRun(true);
+		return;
+	}
+	while(Player.Hidden())
+	{
+	if(first)
+	{
+		first=false;
+		Orion.SetGlobal("hidTime",Orion.Now());
+		CharPrintDelayed('self', '0x00FD', 'Hidden Success');
+		Bandage();
+	}
+
+	Orion.Wait(100);
+	}
+	Orion.OptionAlwaysRun(true);
+	return;
+}
+
+function HidWait(Limit)
+{
+	var start= Orion.Now();
+	var loop=start+parseInt(Limit);
+
+	while(loop>Orion.Now())
+	{
+		if(Orion.InJournal('Nepovedlo se ti schovat.','my|sys',0,0xFFFF,start,loop)){
+			return false;
+		}
+		Orion.Wait(100);
+	}
+	return true;
+}
+
+function TrackPlayers()
+{
+	Track(3);//3);
+}
+function TrackAnimals()
+{
+	Track(0);
+}
+function TrackMonsters()
+{
+	Track(1);
+}
+function Track(choice)
+{
+	var list=Orion.GetFriendList();
+	var listName =[];
+	for(i=0;i<list.length;i++)
+	{
+		var obj =Orion.FindObject(list[i]);
+		if(!obj)continue;
+		listName.push(obj.Name());
+	}
+
+	Orion.WarMode(false);
+	Orion.CancelWaitMenu();
+	Orion.Wait(200);
+	Orion.WaitMenu('Tracking', choice);
+	Orion.UseSkill('Tracking');
+	Orion.Wait(300);
+
+	var menu = Orion.GetMenu(0);
+	if (Orion.InJournal('You see '))
+	{
+		menu.Close();
+		Orion.ClearJournal('You see ');
+   	 	return;
+	}
+
+	var count = menu.ItemsCount();
+	var items = {};
+
+	for (var i=0; i < count; i++){
+		var add=true;
+		for(a=0;a<listName.length;a++)
+		{
+			if(listName[a]==menu.ItemName(i))
+			{
+	   	 		add=false;
+		    		break;
+	 	  	}
+		}
+		if(add==true)
+		{
+			if(!items[menu.ItemName(i)])
+			{
+				items[menu.ItemName(i)]=1;
+			}
+			else
+			{
+				items[menu.ItemName(i)]=items[menu.ItemName(i)]+1;
+			}
+			//Orion.Print(items[menu.ItemName(i)].Name);
+		//	items.push({Name:menu.ItemName(i),Count:1});
+		}
+	}
+	menu.Close();
+	Orion.Wait(100);
+	Orion.Print('Na tracku : ' + count);
+
+	for (var key in items) {
+		var cn=parseInt(items[key]);
+		if(cn>1){
+   			Orion.Print("   "+key +" : "+cn);}
+   		else{
+   			Orion.Print("   "+key);
+   		}
+    }
+
+}
+
+function SwitchTarget()
+{
+	if(Orion.GetGlobal("trgMode")==0)
+	{
+		Orion.SetGlobal("trgMode", 1);
+		Orion.Print("Target Mordor");
+	}
+	else if(Orion.GetGlobal("trgMode")==1)
+	{
+		Orion.SetGlobal("trgMode", 2);
+		Orion.Print("Target Gondor");
+	}
+	else 
+	{
+		Orion.SetGlobal("trgMode", 0);
+		Orion.Print("Target PVM");
+	}
+}
+
+function TargetNext()
+{
+	var serial = FindNearestTarget();
+	if(!serial.length) return;
+	Orion.CloseStatusbar('lasttarget');
+	CharPrintDelayed(serial, '30',Orion.RequestName(serial,100)+ ' - TARGET');
+	Orion.ShowStatusbar(serial,statusX,statusY);
+	Orion.ClientLastTarget(serial);
+	Orion.TargetObject(serial);
+	Orion.Ignore(serial);        
+}
+
+function TargetClosestRed()
+{
+	Orion.IgnoreReset();
+	var humans = Orion.FindType('-1', '-1', ground, 'near|mobile', '18','murderer');	
+	if (humans.length )
+	{
+		Orion.CloseStatusbar('lasttarget');
+		CharPrintDelayed(humans[0], '30', Orion.RequestName(humans[0],100)+ ' - TARGET');
+		Orion.ClientLastTarget(humans[0]);
+		Orion.TargetObject(humans[0]);
+		Orion.ShowStatusbar(humans[0],statusX,statusY);
+		Orion.Ignore(humans[0]);
+	}
+}
+
+function FindNearestTarget()
+{	
+	Orion.Ignore('self');
+	 if(Orion.GetGlobal("trgMode")==1)
+	 {
+		var humans = Orion.FindType('0x0190|0x0191', '-1', ground, 'near|mobile|human', '18','murderer');	
+		if ( !humans.length )
+		{
+			//Orion.Print( '-1', 'no humans found, resetting ignore list');
+			Orion.IgnoreReset();
+			return '';
+		}
+	return humans[0];
+	} else
+	if(Orion.GetGlobal("trgMode")==2)
+	 {
+		var humans = Orion.FindType('0x0190|0x0191', '-1', ground, 'near|mobile|human', '18','innocent|friendly|gray|criminal');	
+		if ( !humans.length )
+		{
+			//Orion.Print( '-1', 'no humans found, resetting ignore list');
+			Orion.IgnoreReset();
+			return '';
+		}
+	return humans[0];
+	}
+	else
+	 {
+		var humans = Orion.FindType('-1', '-1', ground, 'mobile', '18','gray|criminal|murderer');	
+		if ( !humans.length )
+		{
+			//Orion.Print( '-1', 'no humans found, resetting ignore list');
+			Orion.IgnoreReset();
+			return '';
+		}
+		for(i=0;i<humans.length;i++)
+		{
+			var tmp= Orion.FindObject(humans[i]).CanChangeName();
+			if(!tmp)
+			{
+				return humans[i];
+			}
+			else
+			{
+				Orion.Ignore(humans[i]);
+			}
+		}
+	return '';
+	}
+}
+
+
+function CharPrintDelayed(serial, color, text, speechDelay)
+{
+	var sDelay=15;
+	if(speechDelay){
+		sDelay=speechDelay;
+	}
+	var oldUse = Orion.OptionScaleSpeech();
+	var oldDelay = Orion.OptionScaleSpeechDelay();
+ 
+	Orion.OptionScaleSpeech(true);
+	Orion.OptionScaleSpeechDelay(sDelay);
+ 
+	Orion.CharPrint(serial, color, text);
+	Orion.Wait(100);
+ 
+	Orion.OptionScaleSpeech(oldUse);
+	Orion.OptionScaleSpeechDelay(55);
+}
+
+function SwitchArm2()
+{
+	SwitchArm(2);
+}
+function SwitchArm3()
+{
+	SwitchArm(3);
+}
+function SwitchArm4()
+{
+	SwitchArm(4);
+}
+
+function SwitchArm(max)
+{			
+	for (var i = 0; i <= max; i++)
+	{
+		if(Orion.GetGlobal("weap")==i)
+		{
+			if((i+1)>max)
+			{
+				Orion.Arm(1);
+				Orion.SetGlobal("weap",1);
+			}
+			else
+			{
+				Orion.Arm(i+1);
+				Orion.SetGlobal("weap",i+1);
+			}
+		return;
+		}
+	}
+}
+function BandageClosestBlue()
+{
+	var humans = Orion.FindType('0x0190|0x0191', any, ground, 'near|mobile|human', '6','innocent|friendly|gray|criminal');	
+	if(!humans)return;
+	var trg= Orion.FindObject(humans[0]);
+	if(trg.Hits()<100)
+	{
+		BandageTarget(humans[0],Shaman,false);
+	}
+}
+
+function Bandage(){
+	BandageTarget(null,false,false)
+}
+function bandageT(target, bloodbandage){
+	BandageTarget(target,bloodbandage,false)
+}
+function BandageTarget(Serial, BloodBandage,OverRide)
+{
+	
+	if(Orion.Now()>Orion.GetGlobal('bandageStart'))
+	{
+		Orion.SetGlobal('bandageDone',true);
+		Orion.Wait(100);
+	}
+	if(!OverRide){
+		if(Orion.GetGlobal('bandageDone')==='false')
+		{
+			EquipWeap();
+			return;
+		}
+	}
+	var serial=self;
+	if(Serial){
+		serial=Serial;
+	}else{
+		if(Player.Hits()==Player.MaxHits()){
+			EquipWeap();
+			return;
+		}
+	}
+	if(BloodBandage){
+		var cnt= Orion.FindType('0x0E20', any, backpack);
+		if(!cnt){
+			Orion.Print('Nemas spinave Bandaze');
+			return;
+		}
+	}else{
+		var cnt= Orion.FindType('0x0E21', any, backpack);
+		if(!cnt){
+			Orion.Print('Nemas ciste Bandaze');
+			return;
+		}
+	}
+	var start=Orion.Now();
+	Orion.CancelTarget();
+	Orion.CancelWaitTarget();
+	if(!BloodBandage){
+		Orion.UseType(0x0E21); //ciste bandy
+		Orion.WaitTargetObject(serial);
+	}
+	else{
+		Orion.UseType(0x0E20); // krvave bandy
+		Orion.WaitTargetObject(serial);
+	}
+
+	if(Orion.WaitJournal('Pokousis se vylecit',start,Orion.Now()+2000)){
+		Orion.ClearJournal('Pokousis se vylecit');
+		EquipWeap();
+		Orion.Print('Bandim');
+		Orion.SetGlobal('bandageDone',false);
+		Orion.SetGlobal('bandageStart',Orion.Now()+6500);
+
+	}
+}
+
+function IsShieldEquiped(_private){
+	var shields=['0x1B76','0x1B77','0x1B7B'];
+	var lhand = Orion.ObjAtLayer('LeftHand');
+	if(!lhand)return false;
+	for(var i=0;i<shields.length;i++){
+		if(lhand.Graphic()==shields[i]){			
+			return true;
+		}
+	}
+	return false;
+}
+function EquipWeap(_private)
+{
+	Orion.SetGlobal('Equipping',true);
+	var lhand = Orion.ObjAtLayer('LeftHand');
+	var rhand = Orion.ObjAtLayer('RightHand');
+	
+	if(!rhand){
+
+		if(!lhand){
+			Orion.Arm(Orion.GetGlobal("weap"));
+		}
+		if(IsShieldEquiped()){
+			Orion.Arm(Orion.GetGlobal("weap"));
+		}
+	}
+	Orion.SetGlobal('Equipping',false);
+}
+
+
+function _old_Bandage(_private)
+{
+	if(Orion.Now()>Orion.GetGlobal("bandageStart"))
+	{
+		Orion.SetGlobal("bandageDone",true);
+	}
+	if(Orion.GetGlobal("bandageDone")=='false'){Orion.Print('bandageDOne? '+Orion.GetGlobal("bandageDone"));return;}
+	if(Player.Hits()==Player.MaxHits())
+	{
+		if(Player.MaxMana()>100)
+		{
+			if(!Orion.ObjAtLayer('LeftHand'))
+			{
+				Orion.Arm(Orion.GetGlobal("weap"));
+			}
+		}
+		else{
+			Orion.Wait(200);
+			Orion.Arm(Orion.GetGlobal("weap"));
+		}
+		return;
+	}
+	Orion.SetGlobal("bandageDone",'false');
+	Orion.SetGlobal("bandageStart",Orion.Now()+7000);
+	
+	Orion.CancelTarget();
+	Orion.CancelWaitTarget();
+	if(Orion.GetGlobal("sh")=='false')
+	{
+		Orion.UseType(0x0E21); //ciste bandy
+		Orion.WaitTargetObject(self);
+	}
+	else{
+		Orion.UseType(0x0E20); // krvave bandy
+		Orion.WaitTargetObject(self);
+	}
+	Orion.Print('Bandim');
+	if(Player.MaxMana()>100)
+	{
+		if(!Orion.ObjAtLayer('LeftHand'))
+		{
+			Orion.Print("lefth");
+			Orion.Arm(Orion.GetGlobal("weap"));
+		}
+	}
+	else
+	{
+		Orion.Wait(200);
+		Orion.Arm(Orion.GetGlobal("weap"));
+	}
+}
+
+function _old_bandageT(target, bloodbandage)
+{
+Orion.Print("bandageT "+Orion.GetGlobal("bandageDone"));
+	if(Orion.Now()>Orion.GetGlobal("bandageStart"))Orion.SetGlobal("bandageDone",true);
+	if(Orion.GetGlobal("bandageDone")=="false" )return;
+	if(Orion.GetGlobal("castSpell")=="true" )return;
+		var trg = Orion.FindObject(target.Serial());
+		Orion.Print("bandim "+ trg.Name());
+		Orion.SetGlobal("bandageDone",false);
+		if(bloodbandage==true)
+		{	
+			Orion.Say(".improvement");
+			Orion.Wait(100);
+			Orion.WaitTargetObject(trg.Serial());
+			Orion.UseType(0x0E20);
+			Orion.Wait(500);
+			Orion.Say(".improvement");
+		}
+		else
+		{
+			Orion.WaitTargetObject(trg.Serial());
+			Orion.UseType(0x0E21);
+		}
+		Orion.SetGlobal("bandageStart",Orion.Now()+4500);
+
+}
+
+function OnHitBandage()
+{
+	while(true)
+	{
+		var tmp=Orion.WaitJournal('Tvuj cil krvaci.|Skvely zasah!|Kriticky zasah!|Vysavas staminu|Vysavas zivoty!',Orion.Now(),0);
+		Orion.ClearJournal('Tvuj cil krvaci.|Skvely zasah!|Kriticky zasah!|Vysavas staminu|Vysavas zivoty!');
+		if(Player.Hits!=Player.MaxHits)
+		{
+			var lh=Orion.ObjAtLayer('LeftHand');
+			if(lh.Graphic()=='0x1405' || lh.Graphic()=='0x1404') continue;
+			Bandage();
+		}
+		//Orion.Print("Bandim!!!!!!!!!!!!!");
+		Orion.Wait(200);
+	}
+}
+
+function HPCheck()
+{
+
+	var lastHP=Player.Hits();
+	var change=0;
+	while(true)	
+	{
+		if(Player.Dead())continue;
+		if(lastHP!=Player.Hits())
+		{
+			if(lastHP<Player.Hits() & (Player.Hits()-lastHP)>4 )
+			{
+				change=Player.Hits()-lastHP;
+				 if(change<4)continue;
+				//CharPrintDelayed('self', '0x0044', "["+Player.Hits()+"/"+Player.MaxHits()+"]   +"+change);// +HP
+				CharPrintDelayed('self', '0x0044', "+"+(change/(Player.MaxHits()/100)).toFixed(1));// +HP
+			}
+			else
+			{
+				change=lastHP-Player.Hits();
+				if(change<4)continue;
+				//CharPrintDelayed('self', '0x098E', "["+Player.Hits()+"/"+Player.MaxHits()+"]   -"+change);// -HP
+				CharPrintDelayed('self', '0x0087', "-"+(change/(Player.MaxHits()/100)).toFixed(1));// +HP
+			}
+			lastHP=Player.Hits();
+			
+			
+		}
+		if( !Player.Dead() && Player.Hits()<criticalHits && Player.Hits()>0 && autoDrinkHeal)
+		{
+			var params=['heal'];
+			Orion.Exec('Potion',false,params);
+		}
+		Orion.Wait(100);
+	}
+}
+function CutLeather()
+{
+	var siccors= Orion.FindType('0x0F9E|0x0F9F', '0xFFFF', 'backpack');
+	var leathers= Orion.FindType('0x1078', '0xFFFF', 'backpack');
+	if(!siccors || !siccors)return;
+	for(var i=0;i<leathers.length;i++)
+	{
+		
+		Orion.WaitTargetObject(leathers[i]);
+		
+		Orion.UseType('0x0F9E|0x0F9F');
+		Orion.Wait(300);
+	}
+	
+}
+
+
+function Carv()
+{
+	var carvTool =Orion.FindObject('carv');
+	if(carvTool==null) 
+	{
+		Orion.Print("Nemas nastaveny nuz - carv");
+		return;
+	}
+	Orion.IgnoreReset();
+	var corpses = Orion.FindType('0x2006|0x0EE3|0x0EE4|0x0EE5|0x0EE6',any,ground,3);
+	if(!corpses.length)return;
+	for(i=0;i<corpses.length;i++)
+	{
+		Orion.CancelTarget();
+		var name= Orion.RequestName(corpses[i]);
+		if(Orion.Contains(name,'mustang|oclock|orn|zostrich|ledni|ridgeback|zostrich',true))continue;
+		Orion.WaitTargetObject(corpses[i]);
+		Orion.UseObject(carvTool.Serial());
+		Orion.Wait(250);
+	}
+	Orion.Arm(Orion.GetGlobal("weap"));
+}
+
+
+
+function Throw()
+{
+
+	if(Orion.GetGlobal("throwDelay")=='')Orion.SetGlobal("throwDelay",Orion.Now());
+	if(Orion.GetGlobal("throwDelay")>Orion.Now())
+	{
+		CharPrintDelayed('self', '0x00A1', 'Jeste nemuzes Hazet');
+		return;
+	}
+	if(Orion.GetDistance(lasttarget)>6)
+	{
+		CharPrintDelayed('self', '0x00A1', 'Moc Daleko <'+Orion.GetDistance(lasttarget)+'>');
+	}
+	else
+	{
+		var start=Orion.Now();
+		Orion.Attack(lasttarget);
+		Orion.Say(".throw");
+		Orion.Wait(200);
+		if(Orion.InJournal('Nevidis na cil!','sys|my')!=null){
+			Orion.ClearJournal('Nevidis na cil!');
+			Orion.Arm(Orion.GetGlobal("weap"));
+			return;
+		}
+		Orion.Arm(Orion.GetGlobal("weap"));
+		Orion.Wait(200);
+		Orion.SetGlobal("throwDelay",Orion.Now()+4800);
+		Orion.Wait(1300);
+		CharPrintDelayed('self', '0x00AD', ' <  3  >');
+		Orion.Wait(1100);
+		CharPrintDelayed('self', '0x00AD', ' <  2  >');
+		Orion.Wait(1300);
+		CharPrintDelayed('self', '0x00AD', ' <  1  >');
+		Orion.Wait(1200);
+		CharPrintDelayed('self', '0x00AD', '<< HAZEJ >>');
+	}
+}
+
+function ThrowSmart()
+{
+	if(Orion.GetGlobal('throw')=='true')
+	{
+		Orion.SetGlobal('throw',false);
+		Orion.CharPrint('self',33,'Smart Throw Off');
+		return;
+	}
+	else
+	{
+		Orion.SetGlobal('throw',true);
+		Orion.CharPrint('self',53,'Smart Throw  On');
+	}
+	
+	while(true)
+	{
+		if(Orion.GetGlobal('throw')=='false') break;
+		if(!lasttarget)
+		{
+			Orion.Wait(200);
+			continue;
+		}
+		if(Orion.GetDistance(lasttarget)<3 && Orion.GetGlobal("throwDelay")<Orion.Now())
+		{
+			Throw();
+		}
+	}
+	
+}
+
+function Telep()
+{
+	var teleSc=Orion.FindType('0x1F42','0x0000','backpack','item',true);
+	if(Orion.GetDistance(lasttarget)>12)
+	{
+		Orion.CharPrint(lasttarget, '0x0000', 'Moc Daleko');
+		return;
+	}
+
+	if(teleSc.length)
+	{
+		Orion.WaitTargetObject(lasttarget);
+		Orion.UseObject(teleSc[0]);
+	}
+	else
+	{
+		Orion.Cast("teleport",lasttarget);
+	}
+}
+
+function Reactiv()
+{
+	Bandage();
+	Orion.WarMode(false);
+	var ReactSc=Orion.FindType('0x1F2D','0x0000','backpack','item',true);
+	if(ReactSc.length)
+	{
+		Orion.WaitTargetObject(self);
+		Orion.UseObject(ReactSc[0]);
+	}
+	else
+	{
+		Orion.Cast("reactive armor",self);
+	}
+	var time=Orion.Now()+3000;
+	var msg=Orion.WaitJournal('effectecho',Orion.Now(),time);
+	
+	if(Orion.Contains(msg.Text(),'type=3') && Orion.Contains(msg.Text(),'src_serial='+Player.Serial())&& Orion.Contains(msg.Text(),'graphic=0x376A') )
+	{
+		Orion.Attack(lasttarget);
+		Orion.Wait(6500);
+		CharPrintDelayed(self, '30','Reactiv Off');
+	}
+}
+
+function PotionWatch()
+{
+	var annouced=false;
+	var CureAnnouced=false;
+	while(true)
+	{
+		if(Orion.GetGlobal("cureDuration")<=Orion.Now())
+		{
+			if(!CureAnnouced)
+			{	
+				CureAnnouced=true;
+			 	CharPrintDelayed('self', '0x002A', ' !! CURE vyprchalo!!');
+
+			}
+		}
+		else CureAnnouced=false;
+		if(Orion.GetGlobal("potionDelay")<=Orion.Now())
+		{
+			if(!annouced)
+			{	
+				annouced=true;
+			 	CharPrintDelayed('self', '0x0044', ' > MUZES PIT <');
+
+			}
+		}
+		else 
+		{
+			annouced=false;
+			if(Orion.GetGlobal("potionDelay")-Orion.Now()<=1000)
+			{
+				Orion.Print(0x0035,"Piti za 1");
+			}
+			else if(Orion.GetGlobal("potionDelay")-Orion.Now()<=2000)
+			{
+				Orion.Print(0x0035,"Piti za 2");
+			}
+			else if(Orion.GetGlobal("potionDelay")-Orion.Now()<=3000)
+			{
+				Orion.Print(0x0035,"Piti za 3");
+			}
+			else if(Orion.GetGlobal("potionDelay")-Orion.Now()<=4000)
+			{
+				Orion.Print(0x0035,"Piti za 4");
+			}
+			else if(Orion.GetGlobal("potionDelay")-Orion.Now()<=5000)
+			{
+				Orion.Print(0x0035,"Piti za 5");
+			}
+			else if(Orion.GetGlobal("potionDelay")-Orion.Now()<=10000)
+			{
+				Orion.Print(0x0035,"Piti za > 10");
+			}
+			else if(Orion.GetGlobal("potionDelay")-Orion.Now()<=15000)
+			{
+				Orion.Print(0x0035,"Piti za 15");
+
+			}
+
+		}
+		Orion.Wait(1500);
+	}
+}
+
+function Potion(name)
+{
+	if(Orion.GetGlobal("potionDelay")=='')Orion.SetGlobal("potionDelay",Orion.Now());
+	if(Orion.GetGlobal("potionDelay")>Orion.Now())
+	{
+		CharPrintDelayed('self', '0x00CD', 'Jeste nemuzes Pit  ['+ (Orion.GetGlobal("potionDelay")-Orion.Now()) +']');
+		return;
+	}
+	
+	//Orion.Print(pots[2][3]);
+	
+	switch(name)
+	{
+		case "heal":
+		{
+			if(Orion.FindType(0x0F0E,pots[0][1],backpack,'item',true).length)
+			{
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[0][2]);
+				Orion.SetGlobal("potionDuration",Orion.Now()+pots[0][3]);
+				Orion.Say(".potion"+name);
+			}
+			else
+			{
+				//Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+		case "cure":
+		{
+			if(Orion.FindType(0x0F0E,pots[1][1],backpack,'item',true).length)
+			{
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[1][2]);
+				Orion.SetGlobal("cureDuration",Orion.Now()+pots[1][3]);
+				Orion.Say(".potion"+name);
+			}
+			else
+			{
+				 if(Orion.FindType(0x0F0E,pots[2][1],backpack,'item',true).length)
+				{
+					Orion.SetGlobal("potionDelay",Orion.Now()+pots[2][2]);
+					Orion.SetGlobal("cureDuration",Orion.Now()+pots[2][3]);
+					Orion.Say(".potion"+name);
+				}
+				else Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+		case "invis":
+		{
+			if(Orion.FindType(0x0F0E,pots[3][1],backpack,'item',true).length)
+			{
+				Orion.WarMode(0);
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[3][2]);
+				Orion.SetGlobal("potionDuration",Orion.Now()+pots[3][3]);
+				Orion.Say(".potion"+name);
+			}
+			else
+			{
+				Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+		case "refresh":
+		{
+			if(Orion.FindType(0x0F0E,pots[4][1],backpack,'item',true).length)
+			{
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[4][2]);
+				Orion.SetGlobal("potionDuration",Orion.Now()+pots[4][3]);
+				Orion.Say(".potion"+name);
+			}
+			else
+			{
+				 if(Orion.FindType(0x0F0E,pots[5][1],backpack,'item',true).length)
+				{
+					Orion.SetGlobal("potionDelay",Orion.Now()+pots[5][2]);
+					Orion.SetGlobal("potionDuration",Orion.Now()+pots[5][3]);
+					Orion.Say(".potion"+name);
+				}
+				else Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+		case "reflex":
+		{
+			if(Orion.FindType(0x0F0E,pots[6][1],backpack,'item',true).length)
+			{
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[6][2]);
+				Orion.SetGlobal("potionDuration",Orion.Now()+pots[6][3]);
+				Orion.Say(".potion"+name);
+			}
+			else
+			{
+				Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+		case "mobility":
+		{
+			if(Orion.FindType(0x0F0E,pots[7][1],backpack,'item',true).length)
+			{
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[7][2]);
+				Orion.SetGlobal("potionDuration",Orion.Now()+pots[7][3]);
+				Orion.Say(".potion"+name);
+			}
+			else
+			{
+				Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+		case "nightsight":
+		{
+			if(Orion.FindType(0x0F0E,pots[8][1],backpack,'item',true).length)
+			{
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[8][2]);
+				Orion.SetGlobal("potionDuration",Orion.Now()+pots[8][3]);
+				Orion.Say(".potion"+name);
+				Orion.SetLight(1,31);
+				Orion.SetLight(0,31);
+			}
+			else
+			{
+				Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+		case "agility":
+		{
+			if(Orion.FindType(0x0F0E,pots[9][1],backpack,'item',true).length)
+			{
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[9][2]);
+				Orion.SetGlobal("potionDuration",Orion.Now()+pots[9][3]);
+				Orion.Say(".potion"+name);
+			}
+			else
+			{
+				 if(Orion.FindType(0x0F0E,pots[10][1],backpack,'item',true).length)
+				{
+					Orion.SetGlobal("potionDelay",Orion.Now()+pots[10][2]);
+					Orion.SetGlobal("potionDuration",Orion.Now()+pots[10][3]);
+					Orion.Say(".potion"+name);
+				}
+				else Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+		case "strength":
+		{
+			if(Orion.FindType(0x0F0E,pots[11][1],backpack,'item',true).length)
+			{
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[11][2]);
+				Orion.SetGlobal("potionDuration",Orion.Now()+pots[11][3]);
+				Orion.Say(".potion"+name);
+			}
+			else
+			{
+				 if(Orion.FindType(0x0F0E,pots[12][1],backpack,'item',true).length)
+				{
+					Orion.SetGlobal("potionDelay",Orion.Now()+pots[12][2]);
+					Orion.SetGlobal("potionDuration",Orion.Now()+pots[12][3]);
+					Orion.Say(".potion"+name);
+				}
+				else Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+		case "clever":
+		{
+			if(Orion.FindType(0x0F0E,pots[13][1],backpack,'item',true).length)
+			{
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[13][2]);
+				Orion.SetGlobal("potionDuration",Orion.Now()+pots[13][3]);
+				Orion.Say(".potion"+name);
+			}
+			else
+			{
+				 if(Orion.FindType(0x0F0E,pots[14][1],backpack,'item',true).length)
+				{
+					Orion.SetGlobal("potionDelay",Orion.Now()+pots[14][2]);
+					Orion.SetGlobal("potionDuration",Orion.Now()+pots[14][3]);
+					Orion.Say(".potion"+name);
+				}
+				else Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+		case "stoneskin":
+		{
+			if(Orion.FindType(0x0F0E,pots[15][1],backpack,'item',true).length)
+			{
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[15][2]);
+				Orion.SetGlobal("potionDuration",Orion.Now()+pots[15][3]);
+				Orion.Say(".potion"+name);
+			}
+			else
+			{
+				Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+		case "reactive":
+		{
+			if(Orion.FindType(0x0F0E,pots[16][1],backpack,'item',true).length)
+			{
+				Orion.SetGlobal("potionDelay",Orion.Now()+pots[16][2]);
+				Orion.SetGlobal("potionDuration",Orion.Now()+pots[16][3]);
+				Orion.Say(".potion"+name);
+			}
+			else
+			{
+				Orion.Print("Nemas "+ name +" potion");
+			}
+			break;
+		}
+
+		
+	}
+	if(Orion.GetGlobal("potionDelay")>=Orion.Now()){
+		Orion.Print("Pouzit potion: "+ name);
+	}
+	Bandage();
+}
+
+
+function OpenDoor()
+{
+	var portaFechada= Orion.FindType('0x3EB2|0x3EB1|0x0675|0x0677|0x0679|0x067B|0x067D|0x067F|0x0681|0x0683|0x0685|0x0687|0x0689|0x068B|0x068D|0x068F|0x0691|0x0693|0x0695|0x0697|0x0699|0x069B|0x069D|0x069F|0x06A1|0x06A3|0x06A5|0x06A7|0x06A9|0x06AB|0x06AD|0x06AF|0x06B1|0x06B3|0x06B5|0x06B7|0x06B9|0x06BB|0x06BD|0x06BF|0x06C1|0x06C3|0x06C5|0x06C7|0x06C9|0x06CB|0x06CD|0x06CF|0x06D1|0x06D3|0x06D5|0x06D7|0x06D9|0x06DB|0x06DD|0x06DF|0x06E1|0x06E3|0x06E5|0x06E7|0x06E9|0x06EB|0x06ED|0x06EF|0x06F1|0x06F3|0x06F5|0x0824|0x0826|0x0828|0x082A|0x082C|0x082E|0x0830|0x0832|0x0839|0x083B|0x083D|0x083F|0x0841|0x0843|0x0845|0x0847|0x084C|0x084E|0x0850|0x0852|0x0854|0x0856|0x0858|0x085A|0x0866|0x0868|0x086A|0x086C|0x086E|0x0870|0x0872|0x0874|0x1FED|0x1FEF|0x1FF1|0x1FF3|0x1FF5|0x1FF7|0x1FF9|0x1FFB|0x00E8|0x00EA|0x00EC|0x00EE|0x00F0|0x00F2|0x00F4|0x00F6|0x0314|0x0316|0x0318|0x031A|0x031C|0x031E|0x0320|0x0322|0x0324|0x0326|0x0328|0x032A|0x032C|0x032E|0x0330|0x0332|0x0334|0x0336|0x0338|0x033A|0x033C|0x033E|0x0340|0x0342|0x0344|0x0346|0x0348|0x034A|0x034C|0x034E|0x0350|0x0352|0x0354|0x0356|0x0358|0x035A|0x035C|0x035E|0x0360|0x0362','-1',ground,'',2);
+	var portaAberta =Orion.FindType('0x3ED5|0x3ED4|0x0676|0x0678|0x067A|0x067C|0x067E|0x0680|0x0682|0x0684|0x0686|0x0688|0x068A|0x068C|0x068E|0x0690|0x0692|0x0694|0x0696|0x0698|0x069A|0x069C|0x069E|0x06A0|0x06A2|0x06A4|0x06A6|0x06A8|0x06AA|0x06AC|0x06AE|0x06B0|0x06B2|0x06B4|0x06B6|0x06B8|0x06BA|0x06BC|0x06BE|0x06C0|0x06C2|0x06C4|0x06C6|0x06C8|0x06CA|0x06CC|0x06CE|0x06D0|0x06D2|0x06D4|0x06D6|0x06D8|0x06DA|0x06DC|0x06DE|0x06E0|0x06E2|0x06E4|0x06E6|0x06E8|0x06EA|0x06EC|0x06EE|0x06F0|0x06F2|0x06F4|0x06F6|0x0825|0x0827|0x0829|0x082A|0x082C|0x082E|0x0831|0x0833|0x083A|0x083C|0x083E|0x0840|0x0842|0x0844|0x0846|0x0848|0x084D|0x084F|0x0851|0x0853|0x0855|0x0857|0x0859|0x085B|0x0867|0x0869|0x086B|0x086D|0x086F|0x0871|0x0873|0x0875|0x1FEE|0x1FF0|0x1FF2|0x1FF4|0x1FF6|0x1FF8|0x1FFA|0x1FFC|0x00E9|0x00EB|0x00ED|0x00EF|0x00F1|0x00F3|0x00F5|0x00F7|0x0315|0x0317|0x0319|0x031B|0x031D|0x031F|0x0321|0x0323|0x0325|0x0327|0x0329|0x032B|0x032D|0x032F|0x0331|0x0333|0x0335|0x0337|0x0339|0x033B|0x033D|0x033F|0x0341|0x0343|0x0345|0x0347|0x0349|0x034B|0x034D|0x034F|0x0351|0x0353|0x0355|0x0357|0x0359|0x035B|0x035D|0x035F|0x0361|0x0363','-1',ground,'',3);
+	var shipDoorOpen =Orion.FindType('0x3EB2|0x3EB1|0x3E8A|0x3E85','-1',ground,'',18);
+	var shipDoorClosed =Orion.FindType('0x3E89|0x3E84','-1',ground,'',18);
+
+	if (portaAberta.length > 0)
+	{
+		var porta = portaAberta;
+	}
+	else
+	{
+		var porta = portaFechada;
+	}
+	if(porta.length)
+	{
+		var quantity = porta.length;
+		Orion.Print(quantity);
+		for (i = 0; i < quantity; i++)
+		{
+			Orion.UseObject(porta[i]);
+			Orion.Wait(30);
+		}
+    }
+	
+	if (shipDoorClosed.length > 0)
+	{
+		var porta = portaAberta;
+	}
+	else
+	{
+		var porta = shipDoorOpen;
+	}
+	if(porta.length)
+	{
+		var quantity = porta.length;
+		Orion.Print(quantity);
+		for (i = 0; i < quantity; i++)
+		{
+			Orion.UseObject(porta[i]);
+			Orion.Wait(30);
+		}
+    }
+}
+
+
+function AddProvo()
+{
+	var start= Orion.Now()+6000;
+	Orion.AddObject('trg1');
+	while(Orion.HaveTarget()){
+		Orion.Wait(100);
+		if(Orion.Now()>start)return;
+	}
+	Orion.AddObject('trg2');
+}
+function Provo()
+{
+	var start= Orion.Now()+1000;
+	Orion.WaitTargetObject('trg1');
+	Orion.Say(".provo");
+	while(!Orion.HaveTarget()){
+		Orion.Wait(100);
+		if(Orion.Now()>start)return;
+	}
+	Orion.TargetObject('trg2');
+}
+
+function Probo()
+{
+	var dist= 100;
+	if(!Player.Hidden())
+	{
+		Hid();
+		return;
+	}
+	if(Orion.GetGlobal("probo")=='true')
+	{
+		Orion.SetGlobal("probo",false);
+		CharPrintDelayed('self', '0x00FA', "Probo Off");
+		return;
+	}
+	Orion.SetGlobal("probo",true);
+	CharPrintDelayed('self', '0x00F1', "Probo ON");
+	while((Orion.Now()-3000)<Orion.GetGlobal("hidTime"))
+	{
+		Orion.Wait(100);
+		if(Orion.GetGlobal("probo")=='false')
+		{
+			CharPrintDelayed('self', '0x00FA', "Probo Off");
+			return;
+		}
+		if(!Player.Hidden())
+		{
+			Orion.SetGlobal("probo",false);
+			Hid();
+			return;
+		}
+	}
+	CharPrintDelayed('self', '0x00AA', "Bodam");
+	while(Player.Hidden())
+	{
+		if(Orion.GetGlobal("probo")=='false')
+		{
+			CharPrintDelayed('self', '0x00FA', "Probo Off");
+			return;
+		}
+		if(Orion.GetDistance(lasttarget)<5)
+		{
+			if(Orion.GetDistance(lasttarget)<2)
+			{
+				Orion.WaitTargetObject(lasttarget);
+				Orion.Say(".usehand");
+				Orion.Wait(100);
+			}
+			if(dist!=Orion.GetDistance(lasttarget))
+			{
+				dist=Orion.GetDistance(lasttarget);
+				Orion.CharPrint(lasttarget, '0x000F','Distance : '+ dist);
+			}
+		}
+		Orion.Wait(100);
+	}
+	Orion.SetGlobal("probo",false);
+	Hid();
+}
+
+function EnticLastTarget()
+{
+	var target=lasttarget;
+	Orion.SetGlobal('Music',true);
+	Orion.ClearJournal('Zameruj jen monstra');
+	Orion.ClearJournal('Tohle nemuzes oslabit.');
+	Orion.ClearJournal('Oslabeni teto prisery presahuje tve moznosti');
+	Orion.ClearJournal('Oslabeni bylo uspesne.');
+	Orion.ClearJournal('Oslabeni se nepovedlo.');
+	Orion.ClearJournal('Nespechej s pouzivanim dovednosti.');
+
+
+	var maxTry=1;
+
+	for(i=0;i<maxTry;i++)
+	{
+		if(Orion.GetDistance(target)>18) return;
+		var Start=Orion.Now();
+		Orion.WarMode(false);
+		Orion.UseSkill("enticement",target);
+		var rtn=Orion.WaitJournal('Zameruj jen monstra|Tohle nemuzes oslabit.|Oslabeni teto prisery presahuje tve moznosti|Oslabeni bylo uspesne.|Oslabeni se nepovedlo.|Nespechej s pouzivanim dovednosti.',Start,Start+3000);
+			Orion.SetGlobal('Music',false);
+		if(rtn==null)return;
+		if(rtn.Text()=='Oslabeni bylo uspesne.')
+		{
+			break;
+		}
+		if(rtn.Text()=='Zameruj jen monstra|Tohle nemuzes oslabit.|Oslabeni teto prisery presahuje tve moznosti') 
+			return;
+	}
+}
+
+function PeaceLastTarget()
+{
+	var target=lasttarget;
+	Orion.SetGlobal('Music',true);
+	Orion.ClearJournal('Uklidneni se povedlo.');
+	Orion.ClearJournal('Jiz neni co uklidnovat!');
+	Orion.ClearJournal('Tohle nemuzes');
+	Orion.ClearJournal('Uklidnovani nezabralo.');
+	Orion.ClearJournal('You play poorly.');
+	Orion.ClearJournal('Nespechej s pouzivanim dovednosti.');
+	Orion.ClearJournal('tve moznosti.');
+
+
+	var maxTry=1;
+
+	for(i=0;i<maxTry;i++)
+	{
+		if(Orion.GetDistance(target)>18) return;
+		var Start=Orion.Now();
+		Orion.WarMode(false);
+		Orion.UseSkill("Peacemaking",target);
+		var rtn=Orion.WaitJournal('Uklidneni se povedlo.|Jiz neni co uklidnovat!|Tohle nemuzes|Uklidnovani nezabralo.|You play poorly.|nespechej s pouzivanim dovednosti.|tve moznosti.',Start,Start+3000);
+		Orion.SetGlobal('Music',false);
+		if(rtn==null)return;
+	}
+}
+
+function SetTarg()
+{
+	Orion.Print("zamer novy target");
+	var acTarg= Orion.lasttarget;
+	Orion.CloseStatusbar(acTarg);
+	Orion.AddObject("trg");
+	while(Orion.HaveTarget()) Orion.Wait(100);
+	var obj =Orion.FindObject("trg");
+	Orion.ClientLastTarget(obj.Serial());
+	Orion.TargetObject(obj.Serial());
+	Orion.RemoveObject("trg");
+	Orion.ShowStatusbar(obj.Serial(),statusX,statusY);
+}
+
+function AutoHeal()
+{
+	var crystal=false;
+	while(true)
+	{
+		Orion.Wait(200);
+		if(Player.Dead())continue;
+		if(Player.Hidden())continue;	 	
+
+		if(Orion.GetGlobal('castSpell')=='true')continue;
+		if(Orion.GetGlobal('res')=='true')continue;
+
+		if(Player.Hits()<120)
+		{
+			BandageTarget(self, Shaman);
+			continue;
+		}
+		var lowHP=90;
+		var heal=null;
+		var list=Orion.GetFriendList();
+		for (var i = 0; i < list.length; i++)
+		{
+			var targ = Orion.FindObject(list[i]);
+			if(!targ)continue;
+			if(Orion.GetDistance(targ.Serial())>6)continue;
+			if(targ.Hits()<lowHP && targ.Hits()>0 && !targ.Dead())
+			{
+				lowHP=targ.Hits();
+				heal=targ;
+			}
+		}
+		if(!heal)
+		{
+
+			if(crystal==true)
+			{
+				crystal=false;
+				Orion.Say(".enlightment");
+			}
+			Orion.Wait(100);
+		}
+		else
+		{
+		//Orion.Print(Orion.GetGlobal('Music'));
+			if(Orion.GetGlobal('Music')=='true' && lowHP>75){
+				continue;
+			}
+			if(Shaman==false)
+			{
+				if(crystal==false)
+				{
+					crystal=true;
+					Orion.Say(".enlightment");
+					Orion.Wait(200);
+				}
+			}
+			BandageTarget(heal.Serial(), Shaman,false)
+		}
+	}
+}
+
+function VooDooObet()
+{
+	if(Player.Hits()<85)return;
+	if(Player.Mana()==Player.MaxMana())return;
+	Orion.Exec("Bandage");
+	Orion.Say(".voodooobet");
+	Orion.Wait(100);
+}
+
+function BloodPact()
+{
+	Orion.Say(".bloodpact");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}
+	var endTime= Orion.Now()+400000;
+	while(Orion.Now()<endTime)
+	{
+		Orion.Wait(3000);
+	}
+	Orion.CharPrint(Player.Serial(), 0x00E0, 'Voodoo Blood Pact');
+}
+
+function VoodooBoost(typ)
+{
+	var str = Orion.FindType(0x0F0E, 0x0835, 'backpack');
+	var dex = Orion.FindType(0x0F0E, 0x0006, 'backpack');
+	var int = Orion.FindType(0x0F0E, 0x06C2, 'backpack');
+	var ar = Orion.FindType(0x0F0E, 0x0999, 'backpack');
+	var heads =[];
+	var head=Orion.FindType(0x1CE9, 0x0000, backpack);
+	for (var i = 0; i < head.length; i++)
+	{
+		heads.push(head[i]);
+	}
+	head=Orion.FindType(0x1CE1, 0x0000, backpack);
+	for (var i = 0; i < head.length; i++)
+	{
+		heads.push(head[i]);
+	}
+	
+	for (var i = 0; i < heads.length; i++)
+	{
+		var h=Orion.FindObject(heads[i]);
+		Orion.Click(heads[i]);
+		Orion.Wait(100);
+		if(!h)continue;
+		if(h.Name()==Player.Name())
+		{
+			if(typ=="str")
+			{
+				Orion.WaitTargetObject(str[0]);
+				Orion.UseObject(heads[i]);
+			}
+			if(typ=="dex")
+			{
+				Orion.WaitTargetObject(dex[0]);
+				Orion.UseObject(heads[i]);
+			}
+			if(typ=="int")
+			{
+				Orion.WaitTargetObject(int[0]);
+				Orion.UseObject(heads[i]);
+			}
+			if(typ=="ar")
+			{
+				Orion.WaitTargetObject(ar[0]);
+				Orion.UseObject(heads[i]);
+			}
+		}
+	}
+}
+
+function ResVeter()
+{
+	Orion.IgnoreReset();
+	var list = Orion.FindType(0x2006, '-1', ground, 3);
+	var band=Orion.FindType('0x0E21', '-1', backpack);
+	var wrongBody="Tomu uz nepomuze ani svecena voda|Toto neni zvire.|Zvire je vykuchane.| nemuzes ozivovat pomoci obvazu.";
+	if(!list)return;
+
+	for (var i = 0; i < list.length; i++)
+	{
+		var start=Orion.Now();
+		Orion.WaitTargetObject(list[i]);
+		Orion.UseObject(band[0]);
+		Orion.Wait(200);
+		if(!Orion.InJournal(wrongBody, start,Orion.Now(),0))
+		{
+			Orion.ClearJournal(wrongBody);
+			Orion.SetGlobal("res",true);
+			Orion.Say("Resuju");
+			Orion.WaitJournal('Oziveni uspesne.| jsi v ozivovani.', Orion.Now(), Orion.Now()+15000);
+			Orion.ClearJournal('Oziveni uspesne.| jsi v ozivovani.');
+			Orion.SetGlobal("res",false);
+		}
+		Orion.Wait(100);
+	}
+}
+
+function Res()
+{
+	Orion.IgnoreReset();
+	var list = Orion.FindType(0x2006, '-1', ground, 2);
+
+	if(Shaman==true)	{
+		var band=Orion.FindType('0x0E20', '-1', backpack);
+		var wrongBody="Jako Shaman nemuzes takhle ozivovat.";
+	}
+	else{
+		var band=Orion.FindType('0x0E21', '-1', backpack);
+		var wrongBody="Jako Priest nemuzes ozivovat";
+	}
+	if(!list)return;
+
+	for (var i = 0; i < list.length; i++)
+	{
+
+		Orion.WaitTargetObject(list[i]);
+		Orion.UseObject(band[0]);
+		var start=Orion.Now();
+		Orion.Wait(200);
+		if(!Orion.InJournal(wrongBody, start,Orion.Now(),0))
+		{
+			Orion.ClearJournal(wrongBody);
+			Orion.SetGlobal("res",true);
+			Orion.Say("Resuju");
+			Orion.WaitJournal('Ozivil jsi |Ozivila jsi | jsi v ozivovani.', Orion.Now(), Orion.Now()+15000);
+			Orion.ClearJournal('Ozivil jsi |Ozivila jsi | jsi v ozivovani.');
+			Orion.SetGlobal("res",false);
+		}
+		Orion.Wait(100);
+	}
+}
+
+function ResWait(Limit)
+{
+	var start= Orion.Now();
+	var loop=start+parseInt(Limit);
+
+	while(loop>Orion.Now())
+	{
+		if(Orion.InJournal('Telo je prilis daleko.|duch neni ve|ozivil jsi|ozivila jsi','my|sys')){
+			Orion.ClearJournal('Telo je prilis daleko.|duch neni ve|ozivil jsi|ozivila jsi');
+			return;
+		}
+		Orion.Wait(300);
+	}
+}
+
+function Uklid()
+{ // rozmery chest bednicky
+	var MinX=16;
+	var MinY=51;
+	var MaxX=105;
+	var MaxY=105;
+	var x=MinX;
+	var y=MinY;
+  	Orion.AddObject("tt");
+	while(Orion.HaveTarget()) Orion.Wait(100);
+	var target =  Orion.FindObject('tt');
+	var items = Orion.FindType('0xFFFF', '0xFFFF', target.Serial());
+	items.sort(ComparePots);
+	Orion.Print(items.length);
+	for (var i = 0; i < items.length; i++)
+	{
+	Orion.Print(x+": "+y);
+		Orion.MoveItem(items[i],0, target.Serial(),x,y);
+		Orion.Wait(100);
+		x+=13;
+		if(x>=MaxX)
+		{
+			x=MinX;
+			y+=17;
+		}
+	}
+	  	Orion.RemoveObject("tt");
+}
+
+function ComparePots(a,b) {
+	var aa= Orion.FindObject(a);
+	var bb= Orion.FindObject(a);
+  if (aa.Graphic()=='0x0F0E')
+    return -1;
+  if (bb.Graphic()=='0x0F0E')
+    return 1;
+  return 0;
+}
+
+
+function VoodooBoostyAFK()
+{
+	Orion.Terminate('all', ['VoodooBoostyAFK']);
+	Orion.ClearJournal();
+	var Heads={};//[];
+	var HeadsCount=0;
+  	Orion.AddObject("hlav");
+	while(Orion.HaveTarget()) Orion.Wait(100);
+	var target =  Orion.FindObject('hlav');
+	var hlavy=Orion.FindType('0x1CE9|0x1DAE|0x1CE1|0x1DA0', '0xFFFF', target.Serial());
+	HeadsCount=hlavy.length;
+	for(var i=0;i<hlavy.length;i++)
+	{
+		var h=Orion.FindObject(hlavy[i]);
+		Orion.RequestName(h.Serial(), 250);
+		if(!Heads[h.Name()])//)==-1)
+		{
+			var hea = { Name: h.Name(), Serial: h.Serial()};   
+			Heads[h.Name()]=h.Serial()//.push(hea);
+			Orion.Print("add "+hea.Name+", "+hea.Serial);
+		}
+	}
+	Orion.RemoveObject('hlav');
+
+	var str = Orion.FindType(0x0F0E, 0x0835, target.Serial());
+	var dex = Orion.FindType(0x0F0E, 0x0006, target.Serial());
+	var int = Orion.FindType(0x0F0E, 0x06C2, target.Serial());
+	var ar = Orion.FindType(0x0F0E, 0x0999, target.Serial());
+	var lastSelfBoost=Orion.Now();
+	while(!Player.Dead())
+	{
+		Orion.Wait(200);
+		var boostWait=Orion.WaitJournal('str:|dex:|int:|ar:|svetlo:|cure:', Orion.Now(),Orion.Now()+5000);
+		Orion.Print(boostWait);
+		if(!boostWait)
+		{
+			var seeds= Orion.FindType('0x0C4F|0x0C5A|0x1EBD|0x0DF9', '0xFFFF', 'ground');
+			if(seeds)
+			{
+				for(var i=0;i<seeds.length;i++)
+				{
+					Orion.UseObject(seeds[i]);
+					Orion.Wait(200);
+					var itb= Orion.FindType('0x0C4F|0x0C5A|0x1EBD|0x0DF9', '0xFFFF', 'backpack');
+					for(var x=0;x<itb.length;x++)
+					{
+						Orion.MoveItem(itb[x], 0, '0x400545AE');// bedna na seno
+					}
+				}
+			}
+			if(lastSelfBoost<Orion.Now())
+			{
+				Orion.UseFromGround('0x097B');
+				Orion.Cast('Night Sight',self);
+				Orion.Wait(2222);
+				lastSelfBoost=Orion.Now()+(60000*5);//5 min?
+			}
+			var humans = Orion.FindType('0x0190|0x0191', '-1', ground, 'mobile|human', '4','innocent|friendly|gray|criminal');	
+			if(humans)
+			{
+				for(var i=0;i<humans.length;i++)
+				{
+					var hmn=Orion.FindObject(humans[i]);
+					if(hmn.Hits()<90)
+					{
+						Orion.Say('.improvement');
+						Orion.Wait(200);
+						bandageT(humans[i], true);
+						Orion.Say('.improvement');
+					}
+				}
+			}
+			if(!Player.Hidden())
+			{
+				Orion.Exec('Hid');
+			}
+			continue;
+		}
+		var t=Orion.FindObject(boostWait.Serial());
+		Orion.RequestName(t.Serial(), 250);
+		Orion.Print(Heads[t.Name()]); 
+		if(!Heads.hasOwnProperty(t.Name()))//i].Name==t.Name())
+		{
+			Orion.SayEmote('Nenaleza hlavu '+t.Name());
+		}
+		else
+		{
+			var ser =Heads[t.Name()];//i].Serial;
+			var he=Orion.FindObject(ser);
+			var pos={x:he.X(), y:he.Y()};
+			Orion.MoveItem(ser, 1, 'backpack');
+			Orion.Wait(100);
+			if(boostWait.Text()=="str:")
+			{
+				Orion.WaitTargetObject(str[0]);
+				Orion.UseObject(ser);
+				
+				Orion.SayEmote("Smaci hlavu "+t.Name()+" v lektvaru sily.");
+			}
+			if(boostWait.Text()=="dex:")
+			{
+				Orion.WaitTargetObject(dex[0]);
+				Orion.UseObject(ser);
+				Orion.SayEmote("Smaci hlavu "+t.Name()+" v lektvaru obratnosti.");
+			}
+			if(boostWait.Text()=="int:")
+			{
+				Orion.WaitTargetObject(int[0]);
+				Orion.UseObject(ser);
+				Orion.SayEmote("Smaci hlavu "+t.Name()+" v lektvaru moudrosti.");
+					
+			}
+			if(boostWait.Text()=="ar:")
+			{
+				Orion.WaitTargetObject(ar[0]);
+				Orion.UseObject(ser);
+				Orion.SayEmote("Smaci hlavu "+t.Name()+" v lektvaru kamenne kuze.");
+			}
+			if(boostWait.Text()=="svetlo:")
+			{
+				Orion.Cast("Night Sight",t.Serial());
+				Orion.Wait(1500);
+				continue;
+			}
+			if(boostWait.Text()=="cure:")
+			{
+				Orion.Cast("Cure",t.Serial());
+				Orion.Wait(2000);
+				continue;
+			}
+			Orion.Wait(200);
+			Orion.MoveItem(ser, 1, target.Serial(),pos.x,pos.y);
+			var tmp=Orion.WaitJournal('Nepovedlo se|Jeste nelze pouzit.|seslano uspesne',0,Orion.Now()+2000);
+			if(Orion.InJournal('Nepovedlo se|Jeste nelze pouzit.','my|sys'))
+			{
+				Orion.ClearJournal('Nepovedlo se|Jeste nelze pouzit.');
+				Orion.Wait(3300);
+				Orion.SayEmote('Selhal v ritualu VooDoo');
+			}
+			else{
+				Orion.ClearJournal('Nepovedlo se|Jeste nelze pouzit.|seslano uspesne');
+				Orion.Wait(3300);
+				Orion.SayEmote('Dokoncil ritual VooDoo');
+			}	
+		}
+	}
+}
+
+
+
+function SetPois()
+{
+	Orion.AddObject("Poison");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}
+}
+
+function Pois()
+{
+	Orion.WarMode('false');
+	var btl = Orion.FindObject("Poison");
+	var pois= Orion.FindType(btl.Graphic(), btl.Color(), 'backpack', '', '', '', true);
+	if(pois.length<=0)return;
+	var weap=Orion.ObjAtLayer('RightHand');
+	Orion.WaitTargetObject(weap.Serial());
+	Orion.UseObject(btl.Serial());
+}
+
+
+function PvPLoot()
+{
+	if(Orion.GetGlobal('PvpLot')=='true'){
+		Orion.Terminate('PvPLoot');
+		Orion.SetGlobal('PvpLot',false);
+		
+		Orion.CharPrint(self, 0x0F33, 'PVP lot OFF!');
+		return;
+	}
+	else{
+		Orion.SetGlobal('PvpLot',true);
+		Orion.CharPrint(self, 0x0F33, 'Lotim - PVP !');
+	}
+	var corpse=FindCorpse();
+	if(!corpse) return;
+	var list = Orion.FindList('PVPLoot',corpse.Serial());
+	if (!list.length)
+	{
+		return false;
+	}
+	while(list.length)
+	{
+		if (Orion.GetDistance(corpse.Serial()) > 3){
+			return;
+		}
+		list = Orion.FindList('PVPLoot',corpse.Serial());
+		Orion.MoveItem(list[0], 0, 'lotBag');
+		Orion.Wait(1000);
+	}
+/*	for (var i = 0; i < list.length; i++)
+	{
+		if (Orion.GetDistance(corpse.Serial()) > 3){
+			return;
+		}
+		Orion.MoveItem(list[i], 0, 'lotBag');
+		Orion.Wait(1000);
+	}*/
+}
+
+
+function HealPet()
+{
+	if(Orion.GetGlobal('healpet')=='true')
+	{
+		Orion.SetGlobal('healpet','false');
+		Orion.Arm(Orion.GetGlobal("weap"));
+		Orion.Print('Pet heal OFF');
+		return;
+	}
+	Orion.SetGlobal('healpet','true');
+	Orion.Print('Pet heal On');
+	var pet =Orion.FindObject('pet');
+	//Orion.Print(pet.Hits());
+	if(!pet)
+	{
+		Orion.Print("Nemas nastaveny Pet");
+		Orion.SetGlobal('healpet','false');
+		Orion.Print('Pet heal OFF');
+		return;
+	}
+	
+	while(pet.Hits()!=pet.MaxHits())
+	{
+		if(Orion.GetGlobal('healpet')=='false')
+		{
+			Orion.Print('Pet heal OFF');
+			Orion.Arm(Orion.GetGlobal("weap"));
+			return;
+		}
+		Orion.Wait(200);
+		Orion.WaitTargetObject(pet.Serial());
+		Orion.UseType(0x0E21); //ciste bandy
+		Orion.Wait(200);
+		Orion.Arm(Orion.GetGlobal("weap"));
+		var x= Orion.WaitJournal(' byl uspesne osetren.|Osetreni se ti nepovedlo.| neni zranen.|Moc daleko', Orion.Now(), Orion.Now()+7000);
+	}
+	Orion.SetGlobal('healpet','false');
+	Orion.Print('Pet heal OFF');
+}
+
+
+
+
+function AutoFollow(){
+	if(Orion.GetGlobal("follow")=='true')
+	{
+			Orion.SetGlobal("follow",'false');
+			Orion.Print('Follow OFF');
+			return;
+	}
+	Orion.SetGlobal("follow",'true');
+
+    obj = Orion.FindObject('lasttarget');
+    while (true){
+    		if(Orion.GetGlobal("follow")=='false')
+    		{
+			Orion.Print('Follow OFF');
+			return;
+    		}
+		if(obj.Dead())break;
+       	if (Orion.GetDistance(obj.Serial()) > 2)//&& Orion.CanWalk(obj.Direction(), obj.X(), obj.Y(), obj.Z()))             
+            Orion.WalkTo( obj.X(), obj.Y(), obj.Z());
+            
+
+            //Orion.Wait(100);
+            
+    }
+}
+
+
+
+function Leap()
+{
+	if(Orion.GetGlobal('LeapTime')>Orion.Now())
+	{
+		var delta=Orion.GetGlobal('LeapTime')- Orion.Now();
+		Orion.CharPrint('self','0x011A',"Jeste nemuzes ["+delta +"]" );
+		return;
+	}
+	var trg = Orion.FindObject(lasttarget);
+	if(!trg)
+	{
+		Orion.Print("Nevidis na cil");
+		return;
+	}
+	Orion.Attack(trg.Serial());
+	if(Orion.GetDistance(trg.Serial())<10)
+	{	
+		Orion.Say('.leap');
+		var time=Orion.Now()+3700;
+		Orion.SetGlobal('LeapTime',time);
+		Orion.Wait(3500);
+	 	Orion.CharPrint('self','0x011A',"< LEAP >");
+	}
+	else{
+		Orion.CharPrint('lasttarget', '0x011F','Moc Daleko -> '+Orion.GetDistance(trg.Serial()));
+	}
+}
+
+
+function SpellFizWarSwitch()
+{
+	var layer=
+	Orion.ObjAtLayer('InnerTorso');
+
+	if(!layer){
+		Orion.WarMode();
+	}
+	else{
+		Orion.UseObject(layer.Serial());
+		Orion.WarMode();
+	}
+}
+
+
+function KillAll()
+{
+	var list = Orion.FindType('0xFFFF', '0xFFFF', ground, 'mobile', '18','murderer');
+	for(var i=0;i<list.length;i++)
+	{
+		var targ=Orion.FindObject(list[i]);
+		if(targ.CanChangeName()){
+			continue;
+		}
+		Orion.Say("all kill");
+		Orion.WaitTargetObject(list[i]);
+		Orion.Wait(300);
+	}	
+
+}
+
+function VybavMag(){
+	var items =[];
+	items.push({Name:"GH", Graphic:0x0F0E,Color:0x0160,Amount:5});
+	items.push({Name:"cure", Graphic:0x0F0E,Color:0x008E,Amount:7});
+	items.push({Name:"inis", Graphic:0x0F0E,Color:0x0447,Amount:7});
+	items.push({Name:"refky", Graphic:0x0F0E,Color:0x00ED,Amount:12});
+	items.push({Name:"stoneskin", Graphic:0x0F0E,Color:0x0999,Amount:3});
+	items.push({Name:"bandy", Graphic:0x0E21,Color:0x0000,Amount:40});
+	items.push({Name:"BM", Graphic:0x0F7B,Color:0x0000,Amount:50});
+	items.push({Name:"SS", Graphic:0x0F8D,Color:0x0000,Amount:50});
+	items.push({Name:"SA", Graphic:0x0F8C,Color:0x0000,Amount:50});
+	items.push({Name:"MR", Graphic:0x0F86,Color:0x0000,Amount:50});
+	items.push({Name:"book", Graphic:0x0EFA,Color:0xFFFF,Amount:1});
+	items.push({Name:"roba", Graphic:'0x1F03|0x1F04',Color:0xFFFF,Amount:1});
+	items.push({Name:"lama", Graphic:0x20F6,Color:0x0F0E,Amount:1});
+	items.push({Name:"hlava", Graphic:'0x1DB9|0x1DBA',Color:0x0985,Amount:1});//tu
+	items.push({Name:"krk", Graphic:'0x13D6|0x13D6',Color:0x0985,Amount:1});
+	items.push({Name:"ramena", Graphic:'0x13DC|0x13D4',Color:0x0985,Amount:1});
+	items.push({Name:"ruce", Graphic:'0x13DD|0x13D5',Color:0x0985,Amount:1});
+	items.push({Name:"hrud", Graphic:'0x13E2|0x13DB',Color:0x0985,Amount:1});
+	items.push({Name:"nohy", Graphic:'0x13E1|0x13DA',Color:0x0985,Amount:1});
+	items.push({Name:"hul", Graphic:'0x13F9|0x13F8',Color:0x00ED,Amount:1});
+	items.push({Name:"Manashield", Graphic:0x0E34,Color:0x044D,Amount:3});
+	items.push({Name:"ametyst", Graphic:0x0F16,Color:0x0000,Amount:3});
+	
+	vybav(items);
+}
+
+function vybav(ObjList) // ObjListItem {Name, Graphic, Color, Amount }
+{
+	var x=45;
+	var y=40;
+	Orion.Print("Zamer kde hledat veci");
+	Orion.AddObject("source");
+	Orion.Wait(200);
+	var source=Orion.FindObject("source");
+	while(Orion.HaveTarget())Orion.Wait(100);
+	Orion.Print("Zamer kam veci presunout");
+	Orion.AddObject("target");
+	Orion.Wait(200);
+	var target=Orion.FindObject("target");
+	while(Orion.HaveTarget())Orion.Wait(100);
+	if(target==null){
+		Orion.Print("Zamer kam veci presunout");
+		target=Orion.FindObject("target");
+		while(Orion.HaveTarget())Orion.Wait(100);
+	}
+	if(source==null){
+		Orion.Print("Zamer kde hledat veci");
+		Orion.AddObject("source");
+		source=Orion.FindObject("source");
+	while(Orion.HaveTarget())Orion.Wait(100);
+	}
+	for(var item=0;item<ObjList.length;item++){
+		var it= Orion.FindType(ObjList[item].Graphic, ObjList[item].Color, source.Serial());
+		if(!it.length){
+			Orion.Print(ObjList[item].Name+' nenalezeno');
+			continue;
+		}
+		Orion.MoveItem(it[0], ObjList[item].Amount, target.Serial(),150,150);
+	}
+	var pots=Orion.FindType('0x0F0E','0xFFFF',target.Serial());
+	for(var i=0;i<pots.length;i++){
+		Orion.MoveItem(pots[i],0, target.Serial(),x,y);
+		x=x+13;
+		if(x>120){
+			x=20;
+			y=y+17;
+		}
+	}
+	Orion.MoveItem(Orion.FindType('0x0EFA','0xFFFF',target.Serial())[0],1, target.Serial(),45,125); //BOOK
+	Orion.MoveItem(Orion.FindType('0x0E21','0x0000',target.Serial())[0],0, target.Serial(),60,125); // Bandy
+	Orion.MoveItem(Orion.FindType('0x0E34','0x044D',target.Serial())[0],0, target.Serial(),80,125); // manashield
+	Orion.RemoveObject("source");
+	Orion.RemoveObject("target");
+}
+
+
+
+
+
+// AUTOLOOT
+
+
+function AutoLoot_ItemMap()
+{
+	var corpse;
+	while(true)
+	{
+		Orion.Wait(200);
+		if(Player.Dead()){continue;}
+		if(Player.Hidden()){continue;}
+		corpse = FindCorpse();
+		if (corpse == null)continue;
+		var it=Orion.FindType(any, any, corpse.Serial());
+		if(it.length>9)
+		{
+			//Orion.Ignore(corpse.Serial());
+			continue;
+		}
+		Lot(corpse.Serial(),"LotItemMaps");
+	}
+}
+
+function AutoLoot_Gold()
+{
+	var corpse;
+	while(true)
+	{
+		Orion.Wait(200);
+		if(Player.Dead()){continue;}
+		if(Player.Hidden()){continue;}
+		corpse = FindCorpse();
+		if (corpse == null)continue;
+		var it=Orion.FindType(any, any, corpse.Serial());
+		if(it.length>9)
+		{
+			//Orion.Ignore(corpse.Serial());
+			continue;
+		}
+		Lot(corpse.Serial(),"LotGold");
+	}
+}
+function AutoLoot_Regs()
+{
+	var corpse;
+	while(true)
+	{
+		Orion.Wait(200);
+		if(Player.Dead()){continue;}
+		if(Player.Hidden()){continue;}
+		corpse = FindCorpse();
+		if (corpse == null)continue;
+		var it=Orion.FindType(any, any, corpse.Serial());
+		if(it.length>9)
+		{
+			//Orion.Ignore(corpse.Serial());
+			continue;
+		}
+		Lot(corpse.Serial(),"LotRegs");
+	}
+}
+
+function AutoLoot_Gems()
+{
+	var corpse;
+	while(true)
+	{
+		Orion.Wait(200);
+		if(Player.Dead()){continue;}
+		if(Player.Hidden()){continue;}
+		corpse = FindCorpse();
+		if (corpse == null)continue;
+		var it=Orion.FindType(any, any, corpse.Serial());
+		if(it.length>9)
+		{
+			//Orion.Ignore(corpse.Serial());
+			continue;
+		}
+		Lot(corpse.Serial(),"LotGems");
+	}
+}
+
+function AutoLoot_LeatherFeather()
+{
+	var corpse;
+	while(true)
+	{
+		Orion.Wait(200);
+		if(Player.Dead()){continue;}
+		if(Player.Hidden()){continue;}
+		corpse = FindCorpse();
+		if (corpse == null)continue;
+		var it=Orion.FindType(any, any, corpse.Serial());
+		if(it.length>9)
+		{
+			//Orion.Ignore(corpse.Serial());
+			continue;
+		}
+		Lot(corpse.Serial(),"LotLeather");
+		Lot(corpse.Serial(),"LotFeather");
+	}
+}
+
+function AutoLoot_Custom()
+{
+	var corpse;
+	while(true)
+	{
+		Orion.Wait(200);
+		if(Player.Dead()){continue;}
+		if(Player.Hidden()){continue;}
+		corpse = FindCorpse();
+		if (corpse == null)continue;
+		var it=Orion.FindType(any, any, corpse.Serial());
+		if(it.length>9)
+		{
+		//	Orion.Ignore(corpse.Serial());
+			continue;
+		}
+		Lot(corpse.Serial(),"LotCustom");
+	}
+}
+
+function AutoHideCorpses(){
+	while(true){
+		Orion.Wait(500);
+		if(Player.Dead()){continue;}
+		if(Player.Hidden()){continue;}
+		corpse = FindCorpse();
+		if (corpse == null)continue;
+			var cnt=Orion.FindType('0xFFFF','0xFFFF',corpse);
+			if(cnt.length=='0')
+			{
+				Orion.Hide(corpse);
+			}
+		
+	}
+}
+
+
+function AutoLoot_Ground_ItemMapGoldRegsGems()
+{
+	var corpse;
+	while(true)
+	{
+		Orion.Wait(1000);
+		if(Player.Dead()){continue;}
+		corpse = ground;
+
+
+		Lot(corpse,"LotItemMaps");
+		Lot(corpse,"LotGold");
+		Lot(corpse,"LotRegs");
+		Lot(corpse,"LotGems");
+
+	}
+}
+function FindCorpse(_private)
+{
+	var FindLists= ['LotItemMaps'];//,'LotRegs','LotGems','LotFeather','LotLeather','LotCustom','LotGold'];
+	if(Orion.ScriptRunning('AutoLoot_Gold')) FindLists.push('LotGold');
+	if(Orion.ScriptRunning('AutoLoot_Custom')) FindLists.push('LotCustom');
+	if(Orion.ScriptRunning('AutoLoot_LeatherFeather')){
+		FindLists.push('LotLeather');
+		FindLists.push('LotFeather');
+	}
+	if(Orion.ScriptRunning('AutoLoot_Gems')) FindLists.push('LotGems');
+	if(Orion.ScriptRunning('AutoLoot_Regs')) FindLists.push('LotRegs');
+	var list = Orion.FindType('0x2006', '0xFFFF', ground, '', '3');
+
+	if(!list) return null;
+		
+	var list2=list.filter(function (fil){
+		var items = [];
+		for(var i=0;i<FindLists.length;i++){
+			items= items.concat(Orion.FindList(FindLists[i],fil));
+		}
+		if(items.length) return true;
+		return false;
+	});
+	
+	
+	if (list2.length)
+	{
+		return Orion.FindObject(list2[0]);
+	}
+	return null;
+}
+
+function Lot(corpse, listName)
+{
+	var list = Orion.FindList(listName,corpse);
+	//Orion.Print(list.length);
+	if (!list.length)
+	{
+		return false;
+	}
+	for (var i = 0; i < list.length; i++)
+	{
+		if (Orion.GetDistance(corpse) > 3 && corpse!=ground){
+			return false;
+		}
+		if(corpse==ground && Orion.GetDistance(list[i])>2)continue;
+		var item = Orion.FindObject(list[i]);
+		if(corpse==ground && Math.abs(Player.Z()-item.Z())>3)continue;
+
+		if(item){
+			if(item.Graphic()==0x0E76)
+			{
+				if(item.Color()!=0x0430) continue;
+			}
+			if(item.Graphic()==0x0EED)
+			{
+				if(item.Count()<10) continue;
+			}
+		}
+		
+//Orion.MoveItem(['serial'], [count], ['container'], [x, y], [z]);
+		if(Orion.GetGlobal('Equipping')=='true'){
+			Orion.Wait(1000);
+		}
+		Orion.MoveItem(list[i], 0, 'lotBag');//,60,140);
+		Orion.Wait(200);
+	}
+	return true;
+}
+function LotSipky()
+{
+	while(true)
+	{
+		Orion.Wait(200);
+		if(Player.Dead())
+		{
+			Orion.Wait(200);
+			continue;
+		}
+		var suxsipy=Orion.FindType('0x0F3F', '0x0000', 'backpack');
+		if(suxsipy.length>0){
+			for (var i = 0; i < suxsipy.length; i++)
+			{	
+				Orion.DropHere(suxsipy[i], '10');
+			}
+		}
+		var sipky=Orion.FindType('0x1BFB|0x38D8|0x0F3F', '0xFFFF', 'ground', '', '3');
+		if(sipky.length<1)continue;
+		for (var i = 0; i < sipky.length; i++)
+		{
+			var sip= Orion.FindObject(sipky[i]);
+			if(Math.abs(Player.Z()-sip.Z())>3)continue; // test?
+			if(sip.Color()=='0x0000')continue;
+			Orion.MoveItem(sipky[i], 0, 'backpack');
+			Orion.Wait(200);
+		}
+		var suxsipy=Orion.FindType('0x0F3F', '0x0000', 'backpack');
+		for (var i = 0; i < suxsipy.length; i++)
+		{	
+			Orion.DropHere(suxsipy[i], '10');
+		}
+	}
+	
+}
+
+
+function WalkPath()
+{
+	// Mahat Pavouci
+	//var path=['N','N','N','NW','NE','N','NW','NE','NE','N','NW','NW','NE','N','NE','N','NW','N','NW','N','NE','N','NE','N','NW','N','NW','N','NE','N','NE','N','NW','N','NW','N','NE','N','NE','N','NW','N','NW','N','NE','N','NE','N','NW','N','NW','N','NE','N','NE','N','NW','N','NW','N','NE','N','NE','N'];
+	
+	//Mahat nemrtvi
+	var path=['N','NW','N','NE','N','N','NW','N','N','N','NE','N','N','N','N','NW','N','N','N','N','N','NE','N','N','N','N','NW','N','N','N','NE','N','N','NW','N'];
+	
+	var x=Player.X();
+	var y= Player.Y();
+	for(var i=0;i<path.length;i++)
+	{
+		Orion.Print('krok cislo: '+i+' smer: '+path[i]);
+		Walk(path[i]);
+		while(Player.X()==x && Player.Y()==y)
+		{
+			Orion.Wait(100);
+		}
+	}	
+	Orion.Print('Konec Cesty');
+}
+
+function Walk(dir)
+{
+	var numDir=null; 
+	switch(dir)
+	{
+		case 'N':
+		{
+			numDir=0;
+			break;
+		}
+		case 'NE':
+		{
+			numDir=1;
+			break;
+		}
+		case 'E':
+		{
+			numDir=2;
+			break;
+		}
+		case 'SE':
+		{
+			numDir=3;
+			break;
+		}
+		case 'S':
+		{
+			numDir=4;
+			break;
+		}
+		case 'SW':
+		{
+			numDir=5;
+			break;
+		}
+		case 'W':
+		{
+			numDir=6;
+			break;
+		}
+		case 'NW':
+		{
+			numDir=7;
+			break;
+		}
+	}
+	if(numDir==null)return;
+	if(Player.Direction()==(numDir+128) || Player.Direction()==numDir)
+	{
+		Orion.Print('true');
+		Orion.Step(numDir);
+	}
+	else{
+		Orion.Step(numDir);
+		Orion.Wait(800);			
+		Orion.Step(numDir);
+	}
+	Orion.Wait(800);
+}
+
+
+function Packy()
+{
+	var packy= Orion.FindType('0x1092', '0x0000', 'ground');
+	if(!packy || packy.length==0)
+	{
+		Orion.Print('Zadne packy');
+		return;
+	}
+	for(var i=0;i<packy.length;i++)
+	{
+		Orion.UseObject(packy[i]);
+	}
+}
+
+function Mereni()
+{
+	Orion.UseSkill('Hiding');
+	while(!Player.Hidden())
+	{
+		Orion.Wait(10);
+	}
+	var start=Orion.Now();
+	Orion.Attack(lasttarget);
+	while(Player.Hidden())
+	{
+		Orion.Wait(10);
+	}
+	Orion.Print(Orion.Now()-start);
+	Orion.WarMode(false);
+
+}
+
+
+
+function ID()
+{
+	Orion.Print('Zamer vetesnika');
+	Orion.AddObject("vetech");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}
+	var vete=Orion.FindObject('vetech');
+	Orion.RemoveObject("vetech");
+	
+	Orion.Print('Zamer bagl s itemama k ID');
+	Orion.AddObject("vetech");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}
+	var bagl=Orion.FindObject('vetech');
+	Orion.RemoveObject("vetech");
+	var items=Orion.FindType(any,any, bagl.Serial());
+	for(var i=0;i<items.length;i++)
+	{
+		Orion.UseObject(vete.Serial());
+		Orion.Wait(200);
+		var gum=Orion.GetLastGump();
+		gum.Select(Orion.CreateGumpHook(1));
+		Orion.WaitTargetObject(items[i]);
+		Orion.Wait(200);
+	}
+
+}
+
+function Presun()
+{
+	Orion.Print('Zamer bagl odkud ');
+	Orion.AddObject("vetech");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}
+	var bagl=Orion.FindObject('vetech');
+	Orion.RemoveObject("vetech");
+	Orion.Print('Zamer bagl KAM ');
+	Orion.AddObject("vetech");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}
+	var bagl2=Orion.FindObject('vetech');
+	Orion.RemoveObject("vetech");
+	var items=Orion.FindType(any,any, bagl.Serial());
+	for(var i=0;i<items.length;i++)
+	{
+		if(Player.Weight()>Player.MaxWeight()-20)break;
+		Orion.MoveItem(items[i], 1, bagl2.Serial());
+		Orion.Wait(200);
+		
+	}
+}
+
+
+function MoveAll(){
+	Orion.Print("Zamer kde hledat");
+	Orion.AddObject("one");
+	var target=Orion.FindObject("one");
+	while(Orion.HaveTarget())Orion.Wait(100);
+	if(target==null){
+		Orion.Print("Zamer kde hledat");
+		target=Orion.FindObject("one");
+		while(Orion.HaveTarget())Orion.Wait(100);
+	}
+	Orion.Print("Zamer kam davat");
+	Orion.AddObject("vysyp");
+	var vys=Orion.FindObject("vysyp");
+	while(Orion.HaveTarget())Orion.Wait(100);
+	if(vys==null){
+		Orion.Print("Zamer kam davat");
+		vys=Orion.FindObject("vysyp");
+		while(Orion.HaveTarget())Orion.Wait(100);
+	}
+	OpenAllContainers(target.Serial());
+	Orion.Wait(200);
+	//var fnd= Orion.FindType('0x0F0E','0xFFFF',target.Serial());
+	var fnd=Orion.FindList('LotGems', target.Serial(),any, any, any,true);
+	for(var i=0;i<fnd.length;i++){
+		
+		Orion.MoveItem(fnd[i], 0, vys.Serial());
+		Orion.Wait(100);
+	}
+	Orion.RemoveObject("one");
+	Orion.RemoveObject("vysyp");
+}
+
+
+function MoveByID()
+{
+var ids=[
+'0x4005D0A0','0x4002314F','0x4007C7FB','0x4004A2C7','0x40063491','0x400478D9','0x40004685','0x400553B2','0x4004212C','0x4002D2F2','0x4002DE1B','0x400418B3','0x40078E79'
+];
+
+Orion.Print(ids.length);
+
+	Orion.Print('Zamer item truhlu');
+	Orion.AddObject("vetech");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}
+	var target=Orion.FindObject('vetech');
+	Orion.RemoveObject("vetech");
+	
+	Orion.Print('Zamer bagl kam dat naleznute');
+	Orion.AddObject("vetech");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}
+	var bagl=Orion.FindObject('vetech');
+	Orion.RemoveObject("vetech");
+	
+	OpenAllContainers(target.Serial());
+	Orion.Wait(200);
+	
+	for(var i=0;i<ids.length;i++)
+	{
+		Orion.MoveItem(ids[i], 1, bagl.Serial());
+		Orion.Wait(300);
+		Orion.Print(i);
+	}
+}
+
+function InfoItems()
+{
+	Orion.Print('Zamer item truhlu');
+	Orion.AddObject("vetech");
+	while(Orion.HaveTarget())
+	{
+		Orion.Wait(100);
+	}
+	var target=Orion.FindObject('vetech');
+	Orion.RemoveObject("vetech");
+	TextWindow.Clear();
+	TextWindow.Open();
+	var items=Orion.FindType(any,any, target.Serial());
+	for(var i=0;i<items.length;i++)
+	{
+		InfoItem(items[i]);
+	}
+}
+
+function InfoItem(Serial)
+{
+	var staffTypes=['0x13F9','0x13F8','0x0DF0','0x0DF1']; //GN,GN,BS,BS
+	var target=Orion.FindObject(Serial);
+	for(var a=0;a<containerTypes.length;a++)
+	{
+		if(target.Graphic()==containerTypes[a].Graphic)
+		{
+			Orion.Print("Kontejner, preskakuju");
+			return;
+		}
+	}
+	Orion.ClearJournal();
+	Orion.Click(target.Serial());
+	Orion.Wait(300);
+	var txt="";
+	var txt1="";
+	var txt2="";
+	for(var i=0;i<Orion.JournalCount();i++)
+	{
+		var ln=Orion.JournalLine(i);
+		if(ln.Serial()==target.Serial())
+		{
+			var staff=false;
+			txt=ln.Text();
+			for(var a=0;a<staffTypes.length;a++)
+			{
+				if(target.Graphic()==staffTypes[a])
+				{
+					staff=true;
+				}
+			}
+			try{
+			if(!staff)
+			{
+				txt1=Orion.JournalLine(i+1).Text();
+				txt2=Orion.JournalLine(i+2).Text();
+			}
+			else
+			{
+				txt1=Orion.JournalLine(i+3).Text();
+				txt2=Orion.JournalLine(i+4).Text();
+			}}
+			catch(err){
+			}
+			Orion.ClearJournal();
+		}
+	}
+	
+	TextWindow.Print(txt+"|"+txt1+"|"+txt2);
+	//Orion.Print(txt+", "+txt1+", "+txt2);
+}
+
+function NaklikejZelene()
+{
+	var pytliky=Orion.FindType(0x0E76, 0x0430, ground,'',4);
+	if(!pytliky)return;
+	Orion.Print(pytliky.length);
+	for(var i=0;i<pytliky.length;i++)
+	{
+		Orion.UseObject(pytliky[i]);
+	}
+}

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data version="0">
+    <main flags="8363504" messageslevel="2" searchdistance="3" usedistance="3" opencorpsedistance="1" corpsekeepdelay="10000" waittargetsdelay="500" moveitemsdelay="100" useitemsdelay="200" windowsopacity="100" usefontcolor="false" fontcolor="0x02B2" usecharactersfontcolor="false" charactersfontcolor="0x0045" autoreconnect="false" autoreconnecttimer="60" doubleclickforopendoors="false"/>
+    <display type="3" flags="5" textcolor="0" backgroundcolor="0" titledata="{barlarge}&#9;{hp_maxhp}&#9;{mp_maxmp}&#9;  {sp_maxsp}   {weight_maxweight} &#9;{armor}     {gold}   {bandage}   {Item}   {Map} &#9;{ametyst}&#9;{GH}&#9;{GC}&#9;{GR}&#9;{inv}&#9;"/>
+    <hotkeys passhotkeys="false" commandprefix="_"/>
+    <scripts sortscripts="true" scriptfile="D:/Software/Ultima/Erebor/OA/Autoload.oajs"/>
+</data>

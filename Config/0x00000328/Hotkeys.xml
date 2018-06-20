@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data version="1" size="49">
+    <hotkey type="2" action="0" running_mode="false" key="8" modifiers="64" name="Hid" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="115" modifiers="0" name="Probo" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="88" modifiers="2" name="SwitchTarget" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="113" modifiers="0" name="TargetNext" external_code=""/>
+    <hotkey type="3" action="0" running_mode="false" key="114" modifiers="2" name="" external_code="SwitchArm(3);&#10;"/>
+    <hotkey type="3" action="0" running_mode="false" key="114" modifiers="0" name="" external_code="Bandage()"/>
+    <hotkey type="2" action="0" running_mode="false" key="113" modifiers="2" name="TargetClosestRed" external_code=""/>
+    <hotkey type="3" action="0" running_mode="false" key="1" modifiers="1" name="" external_code="Orion.Attack(lasttarget);"/>
+    <hotkey type="3" action="0" running_mode="false" key="112" modifiers="0" name="" external_code="Orion.Say(&quot;.ripper&quot;);"/>
+    <hotkey type="3" action="0" running_mode="false" key="192" modifiers="0" name="" external_code="Orion.IgnoreReset();&#10;Orion.Resend();&#10;CutLeather();&#10;"/>
+    <hotkey type="3" action="0" running_mode="false" key="112" modifiers="2" name="" external_code="Orion.Say(&quot;.recallhome&quot;);&#10;Orion.TargetObject(self);"/>
+    <hotkey type="2" action="0" running_mode="false" key="116" modifiers="0" name="Throw" external_code="switchArm(4);&#10;"/>
+    <hotkey type="3" action="0" running_mode="false" key="123" modifiers="0" name="" external_code="Orion.Say(&quot;ů&quot;);&#10;Potion(&quot;invis&quot;);"/>
+    <hotkey type="3" action="0" running_mode="false" key="48" modifiers="0" name="" external_code="Potion(&quot;nightsight&quot;);"/>
+    <hotkey type="2" action="0" running_mode="false" key="117" modifiers="0" name="Telep" external_code="Potion(&quot;nightsight&quot;);"/>
+    <hotkey type="2" action="0" running_mode="false" key="120" modifiers="0" name="OpenDoor" external_code="TargetSystemSerial();"/>
+    <hotkey type="3" action="0" running_mode="false" key="121" modifiers="0" name="" external_code="Potion(&quot;heal&quot;);"/>
+    <hotkey type="3" action="0" running_mode="false" key="122" modifiers="0" name="" external_code="Potion(&quot;cure&quot;);"/>
+    <hotkey type="3" action="0" running_mode="false" key="187" modifiers="0" name="" external_code="Potion(&quot;refresh&quot;);"/>
+    <hotkey type="8" action="1" running_mode="false" key="115" modifiers="2" name="" external_code="Potion(&quot;reflex&quot;);"/>
+    <hotkey type="3" action="0" running_mode="false" key="2" modifiers="1" name="" external_code="Orion.WarMode(false);&#10;Orion.WaitTargetObject(lasttarget);&#10;Orion.UseSkill(&quot;enticement&quot;);"/>
+    <hotkey type="2" action="0" running_mode="false" key="37" modifiers="16" name="ThrowSmart" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="68" modifiers="2" name="TrackPlayers" external_code="Orion.WarMode(0);&#10;Orion.UseSkill(&quot;Detecting Hidden&quot;);"/>
+    <hotkey type="2" action="0" running_mode="false" key="84" modifiers="2" name="TrackPlayers" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="219" modifiers="0" name="" external_code="Potion(&quot;reflex&quot;);"/>
+    <hotkey type="10" action="5" running_mode="false" key="65" modifiers="2" name="" external_code=""/>
+    <hotkey type="9" action="22" running_mode="false" key="4" modifiers="1" name="" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="221" modifiers="0" name="" external_code="Potion(&quot;mobility&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="55" modifiers="0" name="" external_code="Potion(&quot;strength&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="56" modifiers="0" name="" external_code="Potion(&quot;agility&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="49" modifiers="0" name="" external_code="Orion.Say(&quot;all come&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="50" modifiers="0" name="" external_code="Orion.Say(&quot;all stop&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="51" modifiers="0" name="" external_code="Orion.Say(&quot;all kill&quot;);"/>
+    <hotkey type="2" action="7" running_mode="true" key="54" modifiers="0" name="Reactiv" external_code=""/>
+    <hotkey type="2" action="0" running_mode="true" key="52" modifiers="0" name="AddProvo" external_code=""/>
+    <hotkey type="2" action="0" running_mode="true" key="53" modifiers="0" name="Provo" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="67" modifiers="2" name="" external_code="Orion.Say(&quot;.podriznuti&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="83" modifiers="2" name="" external_code="Orion.Say(&quot;.strike&quot;);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="38" modifiers="16" name="" external_code="Orion.Say(&quot;.jezdik&quot;);"/>
+    <hotkey type="2" action="4294967295" running_mode="false" key="40" modifiers="16" name="Carv" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="19" modifiers="0" name="" external_code="Orion.AddObject(&quot;trg&quot;);&#10;while(Orion.HaveTarget()) Orion.Wait(100);&#10;var obj =Orion.FindObject(&quot;trg&quot;);&#10;Orion.ClientLastTarget(obj.Serial());&#10;Orion.TargetObject(obj.Serial());&#10;"/>
+    <hotkey type="10" action="12" running_mode="false" key="226" modifiers="0" name="" external_code=""/>
+    <hotkey type="16" action="21" running_mode="false" key="46" modifiers="16" name="" external_code=""/>
+    <hotkey type="2" action="0" running_mode="true" key="192" modifiers="2" name="SetTarg" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="66" modifiers="2" name="BandageClosestBlue" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="80" modifiers="6" name="Pois" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="80" modifiers="4" name="" external_code=""/>
+    <hotkey type="0" action="0" running_mode="false" key="0" modifiers="0" name="" external_code=""/>
+</data>
