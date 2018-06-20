@@ -1,5 +1,4 @@
 //KONSTANTY
-
 var criticalHits=45; //HP pod ktere se pije GH
 var autoDrinkHeal = true; // povoleni autopiti GH
 
