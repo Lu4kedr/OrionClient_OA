@@ -957,6 +957,10 @@ function BandageTarget(Serial, BloodBandage,OverRide)
 		Orion.SetGlobal('bandageStart',Orion.Now()+6500);
 
 	}
+	else
+	{
+		Orion.SetGlobal('bandageDone',true);
+	}
 }
 
 function IsShieldEquiped(_private){
@@ -1711,7 +1715,7 @@ function EnticLastTarget()
 		var Start=Orion.Now();
 		Orion.WarMode(false);
 		Orion.UseSkill("enticement",target);
-		var rtn=Orion.WaitJournal('Zameruj jen monstra|Tohle nemuzes oslabit.|Oslabeni teto prisery presahuje tve moznosti|Oslabeni bylo uspesne.|Oslabeni se nepovedlo.|Nespechej s pouzivanim dovednosti.',Start,Start+3000);
+		var rtn=Orion.WaitJournal('Zameruj jen monstra|Tohle nemuzes oslabit.|Oslabeni teto prisery presahuje tve moznosti|Oslabeni bylo uspesne.|Oslabeni se nepovedlo.|Nespechej s pouzivanim dovednosti.',Start,Start+4500);
 			Orion.SetGlobal('Music',false);
 		if(rtn==null)return;
 		if(rtn.Text()=='Oslabeni bylo uspesne.')
@@ -1744,7 +1748,7 @@ function PeaceLastTarget()
 		var Start=Orion.Now();
 		Orion.WarMode(false);
 		Orion.UseSkill("Peacemaking",target);
-		var rtn=Orion.WaitJournal('Uklidneni se povedlo.|Jiz neni co uklidnovat!|Tohle nemuzes|Uklidnovani nezabralo.|You play poorly.|nespechej s pouzivanim dovednosti.|tve moznosti.',Start,Start+3000);
+		var rtn=Orion.WaitJournal('Uklidneni se povedlo.|Jiz neni co uklidnovat!|Tohle nemuzes|Uklidnovani nezabralo.|You play poorly.|nespechej s pouzivanim dovednosti.|tve moznosti.',Start,Start+4500);
 		Orion.SetGlobal('Music',false);
 		if(rtn==null)return;
 	}
@@ -1781,7 +1785,7 @@ function AutoHeal()
 			BandageTarget(self, Shaman);
 			continue;
 		}
-		var lowHP=90;
+		var lowHP=95;
 		var heal=null;
 		var list=Orion.GetFriendList();
 		for (var i = 0; i < list.length; i++)
@@ -1808,17 +1812,14 @@ function AutoHeal()
 		else
 		{
 		//Orion.Print(Orion.GetGlobal('Music'));
-			if(Orion.GetGlobal('Music')=='true' && lowHP>75){
+			if(Orion.GetGlobal('Music')=='true' && lowHP>65){
 				continue;
 			}
-			if(Shaman==false)
+			if(Shaman==false && crystal==false)
 			{
-				if(crystal==false)
-				{
-					crystal=true;
-					Orion.Say(".enlightment");
-					Orion.Wait(200);
-				}
+				crystal=true;
+				Orion.Say(".enlightment");
+				Orion.Wait(200);
 			}
 			BandageTarget(heal.Serial(), Shaman,false)
 		}
@@ -1929,7 +1930,7 @@ function ResVeter()
 function Res()
 {
 	Orion.IgnoreReset();
-	var list = Orion.FindType(0x2006, '-1', ground, 2);
+	var list = Orion.FindType('0x2006', any, ground, 2);
 
 	if(Shaman==true)	{
 		var band=Orion.FindType('0x0E20', '-1', backpack);
