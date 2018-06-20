@@ -1927,7 +1927,48 @@ function ResVeter()
 	}
 }
 
+
 function Res()
+{
+	Orion.IgnoreReset();
+	var list = Orion.FindType('0x2006', any, ground, 2);
+	var resInProg='Duch neni ve war modu.|Necht se navrati k zivotu !|Pokousis se ozivit mrtvolu zvirete.';
+	var resDone='Ozivil jsi |Ozivila jsi | jsi v ozivovani.|Oziveni uspesne.|';
+	if(Shaman==true)	{
+		var band=Orion.FindType('0x0E20', '-1', backpack);
+	}
+	else{
+		var band=Orion.FindType('0x0E21', '-1', backpack);
+	}
+	if(!list)return;
+	
+	for (var i = 0; i < list.length; i++)
+	{
+
+		Orion.WaitTargetObject(list[i]);
+		Orion.UseObject(band[0]);
+		var start=Orion.Now();
+		Orion.Wait(300);
+		if(Orion.WaitJournal(resInProg,start,Orion.Now()+500))
+		{
+			if(Orion.InJournal('Duch neni ve war modu.', 'sys', any,any, start, Orion.Now()))
+			{
+				Orion.Print("War!");
+				Orion.SetGlobal("res",false);
+				return;
+			}
+			else{
+				Orion.SetGlobal("res",true);
+				Orion.WaitJournal(resDone,start,Orion.Now()+15000);
+				Orion.SetGlobal("res",false);
+				return;
+			}
+			
+		}
+	}
+}
+
+function Re1s()
 {
 	Orion.IgnoreReset();
 	var list = Orion.FindType('0x2006', any, ground, 2);
@@ -1938,7 +1979,7 @@ function Res()
 	}
 	else{
 		var band=Orion.FindType('0x0E21', '-1', backpack);
-		var wrongBody="Jako Priest nemuzes ozivovat";
+		var wrongBody="Jako Priest nemuzes ozivovat pomoci obvazu.";
 	}
 	if(!list)return;
 
@@ -1948,10 +1989,15 @@ function Res()
 		Orion.WaitTargetObject(list[i]);
 		Orion.UseObject(band[0]);
 		var start=Orion.Now();
-		Orion.Wait(200);
-		if(!Orion.InJournal(wrongBody, start,Orion.Now(),0))
+		Orion.Wait(500);
+		var rtn=Orion.InJournal(wrongBody,'sys',any,any, start,Orion.Now());
+		if(!rtn)Orion.Print("false");
+		if(rtn)
 		{
 			Orion.ClearJournal(wrongBody);
+		}
+		else
+		{
 			Orion.SetGlobal("res",true);
 			Orion.Say("Resuju");
 			Orion.WaitJournal('Ozivil jsi |Ozivila jsi | jsi v ozivovani.', Orion.Now(), Orion.Now()+15000);
