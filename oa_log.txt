@@ -1,5 +1,6 @@
 Log opened.
-UOA: handled  0x130248
+Player 0x0001B8E9 entered the world.
+UOA: handled  0x2005EE
 UOA: registered -mark
 UOA: registered -unmark
 UOA: registered -share
@@ -9,5 +10,4 @@ UOA: registered -find
 UOA: registered -who
 UOA: registered --
 UOA: registered -add
-Player 0x0001B8E9 entered the world.
 Log closed.
