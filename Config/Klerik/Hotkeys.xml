@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<data version="1" size="41">
+<data version="1" size="44">
     <hotkey type="3" action="4294967295" running_mode="false" key="112" modifiers="0" name="" external_code="Orion.Say(&quot;.enlightment&quot;);"/>
     <hotkey type="2" action="0" running_mode="false" key="113" modifiers="0" name="TargetNext" external_code=""/>
     <hotkey type="2" action="0" running_mode="false" key="113" modifiers="2" name="TargetClosestRed" external_code=""/>
@@ -29,15 +29,18 @@
     <hotkey type="2" action="4294967295" running_mode="false" key="54" modifiers="0" name="Cure" external_code=""/>
     <hotkey type="3" action="4294967295" running_mode="false" key="53" modifiers="0" name="" external_code="BandCast('Reactive Armor',lasttarget);"/>
     <hotkey type="2" action="0" running_mode="false" key="120" modifiers="0" name="OpenDoor" external_code=""/>
-    <hotkey type="3" action="4294967295" running_mode="false" key="82" modifiers="2" name="" external_code="Res(false);"/>
+    <hotkey type="2" action="4294967295" running_mode="false" key="82" modifiers="2" name="Res" external_code=""/>
     <hotkey type="8" action="0" running_mode="false" key="119" modifiers="0" name="" external_code=""/>
     <hotkey type="3" action="4294967295" running_mode="false" key="117" modifiers="0" name="" external_code="Orion.Say(&quot;.omraceni&quot;);"/>
     <hotkey type="3" action="4294967295" running_mode="false" key="116" modifiers="0" name="" external_code="BandCast('Reactive Armor',self);"/>
     <hotkey type="3" action="4294967295" running_mode="false" key="68" modifiers="2" name="" external_code="BandCast('Dispel');"/>
-    <hotkey type="3" action="4294967295" running_mode="false" key="68" modifiers="4" name="" external_code="BandCast('Bless',lasttarget);"/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="68" modifiers="4" name="" external_code="BandCast('Dispel',lasttarget);"/>
     <hotkey type="3" action="4294967295" running_mode="false" key="70" modifiers="2" name="" external_code="BandCast('Dispel field');"/>
     <hotkey type="3" action="4294967295" running_mode="false" key="187" modifiers="0" name="" external_code="Potion('refresh');"/>
     <hotkey type="3" action="4294967295" running_mode="false" key="219" modifiers="0" name="" external_code="Potion(&quot;reflex&quot;);"/>
     <hotkey type="3" action="4294967295" running_mode="false" key="221" modifiers="0" name="" external_code="Potion('mobility');"/>
-    <hotkey type="2" action="0" running_mode="false" key="8" modifiers="64" name="" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="8" modifiers="64" name="Hid" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="84" modifiers="2" name="Telep" external_code=""/>
+    <hotkey type="2" action="0" running_mode="false" key="39" modifiers="16" name="AutoCast" external_code=""/>
+    <hotkey type="3" action="4294967295" running_mode="false" key="37" modifiers="16" name="" external_code="BandCast('Harm',lasttarget);"/>
 </data>

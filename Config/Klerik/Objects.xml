@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data version="0" size="4" dressbag="0x00000000">
     <object name="target" id="0x0005A05C"/>
-    <object name="lotBag" id="0x4008C7DB"/>
-    <object name="carv" id="0x4002B2CE"/>
+    <object name="lotBag" id="0x400624A7"/>
+    <object name="carv" id="0x4005E3AB"/>
     <object name="pet" id="0x00000328"/>
 </data>
