@@ -1,7 +1,7 @@
 //KONSTANTY
-var criticalHits = 43; //HP pod ktere se pije GH
+var criticalHits = 45; //HP pod ktere se pije GH
 var autoDrinkHeal = true; // povoleni autopiti GH
-var minVoodooObetHP = 85; // Minimum HP pod ktere se voodooobet neprovede
+var minVoodooObetHP = 80; // Minimum HP pod ktere se voodooobet neprovede
 
 
 var statusX = 1400; //X souradnice statusbaru targetu
@@ -12,8 +12,8 @@ var AutoUnParalyzeSpell = 'Harm';
 //var AutoUnParalyzeSpell = 'Magic Arrow';
 
 //autoheal
-var Shaman = false;  //true -shaman false -klerik
-var lowHP = 90; //procenta HP lecenych pod ktere se zacina lecit
+var Shaman = false;  //true -klerik false -shaman
+var lowHP = 95; //procenta HP lecenych pod ktere se zacina lecit
 var PlayerMinHits = 120; //presny pocet HP pod ktere bandi sebe
 
 
@@ -164,14 +164,14 @@ function AutoArrow() {
 
         var msg = Orion.WaitJournal('nohama ti projela silna bolest|citis, ze se nemuzes hybat.|crying awfully.|Unknown Cliloc #500111', Orion.Now(), Orion.Now() + 10000);
         if (msg) {
-            Orion.SetGlobal('castSpell', 'true');
+            Orion.SetGlobal('castSpell', true);
             Orion.WarMode(false);
             Orion.Wait(100);
             Orion.Cast(AutoUnParalyzeSpell, self);
             for (i = 0; i < spells.length; i++) {
                 if (spells[i][0] == AutoUnParalyzeSpell) {
                     Wait4Cast(spells[i][1]);
-                    Orion.SetGlobal('castSpell', 'false');
+                    Orion.SetGlobal('castSpell', false);
                     break;
                 }
             }
@@ -261,7 +261,7 @@ function BandCast(spellName, target) {
         Bandage();
     }
 
-    Orion.SetGlobal('castSpell', 'true');
+    Orion.SetGlobal('castSpell', true);
     if (target) {
         if (spellName == "frostbolt") {
             Orion.WaitTargetObject(target);
@@ -297,7 +297,7 @@ function BandCast(spellName, target) {
                 Orion.Wait(100);
             }
             var res = Wait4Cast(spells[i][1]);
-            Orion.SetGlobal('castSpell', 'false');
+            Orion.SetGlobal('castSpell', false);
             return res;
         }
     }
@@ -829,23 +829,13 @@ function BandageTarget(Serial, BloodBandage, OverRide) {
         Orion.UseType(0x0E21); //ciste bandy
         Orion.WaitTargetObject(serial);
     } else {
-//if(serial!=self){
-	// Orion.Say(".improvement");
-	// Orion.Wait(400);
-//	 }
         Orion.UseType(0x0E20); // krvave bandy
         Orion.WaitTargetObject(serial);
     }
 
     if (Orion.WaitJournal('Pokousis se vylecit', start, Orion.Now() + 500)) {
         Orion.ClearJournal('Pokousis se vylecit');
-//	if(serial!=self){
-//		 Orion.Wait(400);
-	// Orion.Say(".improvement");
-//
-	// }
         EquipWeap();
-        
         Orion.Print('Bandim');
         Orion.SetGlobal('bandageDone', false);
         Orion.SetGlobal('bandageStart', Orion.Now() + 6500);
@@ -1503,9 +1493,7 @@ function SetTarg() {
     Orion.CloseStatusbar(acTarg);
     Orion.AddObject("trg");
     while (Orion.HaveTarget()) Orion.Wait(100);
-    
     var obj = Orion.FindObject("trg");
-    if(!obj)return;
     Orion.ClientLastTarget(obj.Serial());
     Orion.TargetObject(obj.Serial());
     Orion.RemoveObject("trg");
@@ -1521,8 +1509,7 @@ function AutoHeal() {
             continue;
         }
         if (Orion.GetGlobal('castSpell') == 'true' || Orion.GetGlobal('res') == 'true') {
-        //Orion.Print("cast nebo res");
-            Orion.Wait(200);
+            Orion.Wait(100);
             continue;
         }
 
@@ -1540,7 +1527,7 @@ function AutoHeal() {
             }
             //Orion.Print("DEBUG: not found");
             if (Orion.GetDistance(targ.Serial()) > 6) continue;
-            if (targ.Hits() < 95 && targ.Hits() > 0 && !targ.Dead()) {
+            if (targ.Hits() < lowHP && targ.Hits() > 0 && !targ.Dead()) {
                 lowHP = targ.Hits();
                 heal = targ;
             }
@@ -1549,10 +1536,7 @@ function AutoHeal() {
 
             if (crystal == true) {
                 crystal = false;
-                if(Shaman)
-                		Orion.Say(".improvement");
-                else
-              	 Orion.Say(".enlightment");
+                Orion.Say(".enlightment");
             }
             Orion.Wait(100);
         } else {
@@ -1560,12 +1544,9 @@ function AutoHeal() {
             if (Orion.GetGlobal('Music') == 'true' && lowHP > 65) {
                 continue;
             }
-            if (crystal == false) {
+            if (Shaman == false && crystal == false) {
                 crystal = true;
-                if(Shaman)
-                		Orion.Say(".improvement");
-                else
-              	 Orion.Say(".enlightment");
+                Orion.Say(".enlightment");
                 Orion.Wait(200);
             }
             BandageTarget(heal.Serial(), Shaman, false)
@@ -1620,26 +1601,25 @@ function AutoBoosty() {
         }
     }
     while (true) {
-    	try{
-        var boostWait = Orion.WaitJournal('str:|dex:|int:|ar:|svetlo:|cure:|bless:', Orion.Now(), Orion.Now() + 5000);
+        var boostWait = Orion.WaitJournal('str|dex|int|ar|svetlo|cure|bless', Orion.Now(), Orion.Now() + 5000);
         Orion.Wait(300);
-        if (!boostWait || Player.Hidden()) continue;
-	
+        if (!boostWait) continue;
+
         var t = Orion.FindObject(boostWait.Serial());
         Orion.RequestName(t.Serial(), 250);
         if (t.Notoriety() == 'red') continue;
 
-        if (boostWait.Text() == "svetlo:") {
+        if (boostWait.Text() == "svetlo") {
             Orion.Cast("Night Sight", t.Serial());
             Orion.Wait(1500);
             continue;
         }
-        if (boostWait.Text() == "cure:") {
+        if (boostWait.Text() == "cure") {
             Orion.Cast("Cure", t.Serial());
             Orion.Wait(2000);
             continue;
         }
-        if (boostWait.Text() == "bless:") {
+        if (boostWait.Text() == "bless") {
             Orion.Cast("Bless", t.Serial());
             Orion.Wait(2500);
             continue;
@@ -1650,7 +1630,7 @@ function AutoBoosty() {
                 continue;
             }
             var ser = Heads[t.Name()];
-            if (boostWait.Text() == "str:") {
+            if (boostWait.Text() == "str") {
                 if (str.length < 1) {
                     Orion.Say('Nemam potrebny lektvar pro ' + boostWait.Text() + ' boost');
                     continue;
@@ -1660,7 +1640,7 @@ function AutoBoosty() {
 
                 Orion.SayEmote("Smaci hlavu " + t.Name() + " v lektvaru sily.");
             }
-            if (boostWait.Text() == "dex:") {
+            if (boostWait.Text() == "dex") {
                 if (dex.length < 1) {
                     Orion.Say('Nemam potrebny lektvar pro ' + boostWait.Text() + ' boost');
                     continue;
@@ -1669,7 +1649,7 @@ function AutoBoosty() {
                 Orion.UseObject(ser);
                 Orion.SayEmote("Smaci hlavu " + t.Name() + " v lektvaru obratnosti.");
             }
-            if (boostWait.Text() == "int:") {
+            if (boostWait.Text() == "int") {
                 if (int.length < 1) {
                     Orion.Say('Nemam potrebny lektvar pro ' + boostWait.Text() + ' boost');
                     continue;
@@ -1679,7 +1659,7 @@ function AutoBoosty() {
                 Orion.SayEmote("Smaci hlavu " + t.Name() + " v lektvaru moudrosti.");
 
             }
-            if (boostWait.Text() == "ar:") {
+            if (boostWait.Text() == "ar") {
                 if (ar.length < 1) {
                     Orion.Say('Nemam potrebny lektvar pro ' + boostWait.Text() + ' boost');
                     continue;
@@ -1693,30 +1673,28 @@ function AutoBoosty() {
             var tmp = Orion.WaitJournal('Nepovedlo se|Jeste nelze pouzit.|seslano uspesne', 0, Orion.Now() + 5000);
 
         } else {
-            if (boostWait.Text() == "str:") {
+            if (boostWait.Text() == "str") {
                 BandCast("Strength", t.Serial());
                 Orion.Wait(2500);
                 continue;
             }
-            if (boostWait.Text() == "dex:") {
+            if (boostWait.Text() == "dex") {
                 BandCast("Agility", t.Serial());
                 Orion.Wait(2500);
                 continue;
             }
-            if (boostWait.Text() == "int:") {
+            if (boostWait.Text() == "int") {
                 BandCast("Cunning", t.Serial());
                 Orion.Wait(2500);
                 continue;
             }
-            if (boostWait.Text() == "ar:") {
+            if (boostWait.Text() == "ar") {
                 BandCast("Protection", t.Serial());
                 Orion.Wait(2500);
                 continue;
             }
         }
 
-	}
-	catch(err){}
     }
 
 }
