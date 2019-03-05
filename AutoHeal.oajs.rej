@@ -1,0 +1,7 @@
+diff a/AutoHeal.oajs b/AutoHeal.oajs	(rejected hunks)
+@@ -1,4 +0,4 @@
+-
++var bla =0;
+ var any = 0xFFFF;
+ //Orion.SetGlobal('CanHeal',true);
+ //Orion.SetGlobal('FailSafe',Orion.Now()+6500);
